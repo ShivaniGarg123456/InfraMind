@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfraMind - Department Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="department-container">
+
+        <h1>Department Dashboard</h1>
+        <p>Manage assigned complaints</p>
+
+        <div class="department-card">
+
+            <h2>CSE Lab Computer Issue</h2>
+
+            <p><strong>Priority:</strong> High</p>
+            <p><strong>Deadline:</strong> 24 Hours</p>
+
+            <p>
+                <strong>Status:</strong>
+                <span id="currentStatus" class="status-pending">
+                    Pending
+                </span>
+            </p>
+
+            <button onclick="updateStatus('Pending')">
+                Pending
+            </button>
+
+            <button onclick="updateStatus('In Progress')">
+                In Progress
+            </button>
+
+            <button onclick="updateStatus('Resolved')">
+                Resolved
+            </button>
+
+        </div>
+
+        <a href="admin.html" class="complaint-btn">
+            Back to Admin Dashboard
+        </a>
+
+        <a href="index.html" class="logout-btn">
+            Logout
+        </a>
+
+    </div>
+
+    <script>
+
+        function updateStatus(status) {
+
+            const statusElement = document.getElementById("currentStatus");
+
+            statusElement.textContent = status;
+
+            statusElement.className = "";
+
+            if (status === "Pending") {
+                statusElement.classList.add("status-pending");
+            }
+
+            else if (status === "In Progress") {
+                statusElement.classList.add("status-progress");
+            }
+
+            else if (status === "Resolved") {
+                statusElement.classList.add("status-resolved");
+            }
+        }
+
+    </script>
+
+</body>
+</html>

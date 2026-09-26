@@ -1,0 +1,87 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>InfraMind - Login</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <h1>InfraMind</h1>
+
+        <p>College Complaint Management System</p>
+
+
+        <!-- Student Login -->
+
+        <h2>Student Login</h2>
+
+        <input
+            type="number"
+            id="studentId"
+            placeholder="Student ID"
+        >
+
+        <input
+            type="password"
+            id="studentPassword"
+            placeholder="Password"
+        >
+
+        <button onclick="studentLogin()">
+            Student Login
+        </button>
+
+
+        <!-- Admin Login -->
+
+        <h2>Admin Login</h2>
+
+        <input
+            type="text"
+            id="adminUsername"
+            placeholder="Admin Username"
+        >
+
+        <input
+            type="password"
+            id="adminPassword"
+            placeholder="Password"
+        >
+
+        <button onclick="adminLogin()">
+            Admin Login
+        </button>
+
+    </div>
+
+
+    <script>
+
+        function studentLogin() {
+
+            window.location.href = "dashboard.html";
+
+        }
+
+
+        function adminLogin() {
+
+            window.location.href = "admin.html";
+
+        }
+
+    </script>
+
+</body>
+
+</html>
+```

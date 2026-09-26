@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfraMind - Submit Complaint</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="complaint-container">
+
+        <h1>Submit Complaint</h1>
+        <p>Tell us about your issue</p>
+
+        <label for="studentId">Student ID</label>
+        <input id="studentId" type="number" placeholder="Enter your Student ID">
+
+        <label for="complaintTitle">Complaint Title</label>
+        <input id="complaintTitle" type="text" placeholder="Enter complaint title">
+
+        <label for="complaintDescription">Complaint Description</label>
+        <textarea id="complaintDescription" placeholder="Describe your issue"></textarea>
+
+        <button onclick="submitComplaint()">
+            Submit Complaint
+        </button>
+
+        <br>
+
+        <a href="dashboard.html" class="complaint-btn">
+            Back to Dashboard
+        </a>
+
+    </div>
+
+    <script>
+
+        function submitComplaint() {
+
+            const studentId = document.getElementById("studentId").value;
+            const title = document.getElementById("complaintTitle").value;
+            const description = document.getElementById("complaintDescription").value;
+
+            if (studentId === "" || title === "" || description === "") {
+                alert("Please fill all the fields.");
+                return;
+            }
+
+            window.location.href = "my-complaints.html";
+        }
+
+    </script>
+
+</body>
+</html>
