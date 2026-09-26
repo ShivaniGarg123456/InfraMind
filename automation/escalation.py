@@ -1,24 +1,58 @@
 """
-Escalation logic — marks complaint as escalated and notifies admin.
+Escalation logic — marks complaint as Escalated in the database and notifies admin.
+Works directly with inframind.db (SQLite), matching Member 2's schema.
 """
 
+import sqlite3
 from datetime import datetime
-from automation.sla_config import STATUS_ESCALATED
 from automation.notifications import notify_escalation
 
 
-def escalate_complaint(complaint: dict, admin_email: str) -> dict:
+def get_db():
+    conn = sqlite3.connect("inframind.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def escalate_complaint(complaint_id: int, admin_email: str):
     """
-    complaint: dict with at least 'id', 'title', 'priority', 'is_escalated'
-    Marks complaint as escalated (only once) and sends notification.
+    Marks the complaint as Escalated in the database (only if not already)
+    and sends an email notification to admin.
     """
-    if complaint.get("is_escalated"):
-        return complaint  # already escalated, don't do it again
+    conn = get_db()
 
-    complaint["status"] = STATUS_ESCALATED
-    complaint["is_escalated"] = True
-    complaint["escalated_at"] = datetime.now()
+    complaint = conn.execute(
+        "SELECT * FROM complaints WHERE id = ?", (complaint_id,)
+    ).fetchone()
 
-    notify_escalation(admin_email, complaint)
+    if complaint is None:
+        conn.close()
+        return None
 
-    return complaint
+    # Skip if already escalated
+    if complaint["status"] == "Escalated":
+        conn.close()
+        return dict(complaint)
+
+    now = datetime.now().isoformat()
+
+    conn.execute(
+        """
+        UPDATE complaints
+        SET status = ?, updated_at = ?
+        WHERE id = ?
+        """,
+        ("Escalated", now, complaint_id)
+    )
+    conn.commit()
+
+    updated_complaint = conn.execute(
+        "SELECT * FROM complaints WHERE id = ?", (complaint_id,)
+    ).fetchone()
+
+    conn.close()
+
+    # Send email notification
+    notify_escalation(admin_email, dict(updated_complaint))
+
+    return dict(updated_complaint)
