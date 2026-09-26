@@ -45,14 +45,11 @@ def home():
 def create_complaint():
 
     data = request.get_json()
-
     student_id = data.get("student_id")
     title = data.get("title")
     description = data.get("description")
 
-    # AI complaint classification
     ai_result = classify_complaint(description)
-
     category = ai_result["category"]
     department = ai_result["department"]
     priority = ai_result["priority"]
@@ -60,16 +57,12 @@ def create_complaint():
     status = "Pending"
     now = datetime.now().isoformat()
 
-    # Calculate deadline based on AI priority
     if priority == "Critical":
         deadline = datetime.now() + timedelta(hours=4)
-
     elif priority == "High":
         deadline = datetime.now() + timedelta(hours=24)
-
     elif priority == "Medium":
         deadline = datetime.now() + timedelta(days=2)
-
     else:
         deadline = datetime.now() + timedelta(days=5)
 
@@ -83,46 +76,36 @@ def create_complaint():
          priority, status, deadline, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        student_id,
-        title,
-        description,
-        category,
-        department,
-        priority,
-        status,
-        deadline,
-        now,
-        now
+        student_id, title, description, category, department,
+        priority, status, deadline, now, now
     ))
 
     conn.commit()
 
-# Get the newly created complaint's ID
-new_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    new_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
 
-conn.close()
+    conn.close()
 
-# Send notification to department
-department_email = DEPARTMENT_EMAILS.get(department, "24cse2048@mvn.edu.in")
+    department_email = DEPARTMENT_EMAILS.get(department, "24cse2048@mvn.edu.in")
 
-notify_new_complaint(department_email, {
-    "id": new_id,
-    "title": title,
-    "description": description,
-    "category": category,
-    "priority": priority,
-    "deadline": deadline,
-    "status": status
-})
+    notify_new_complaint(department_email, {
+        "id": new_id,
+        "title": title,
+        "description": description,
+        "category": category,
+        "priority": priority,
+        "deadline": deadline,
+        "status": status
+    })
 
-return jsonify({
-    "message": "Complaint created successfully",
-    "category": category,
-    "department": department,
-    "priority": priority,
-    "status": status,
-    "deadline": deadline
-}), 201
+    return jsonify({
+        "message": "Complaint created successfully",
+        "category": category,
+        "department": department,
+        "priority": priority,
+        "status": status,
+        "deadline": deadline
+    }), 201
 
 
 @app.route("/analytics", methods=["GET"])
