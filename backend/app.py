@@ -103,7 +103,7 @@ new_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
 conn.close()
 
 # Send notification to department
-department_email = DEPARTMENT_EMAILS.get(department, "admin@college.edu")
+department_email = DEPARTMENT_EMAILS.get(department, "24cse2048@mvn.edu.in")
 
 notify_new_complaint(department_email, {
     "id": new_id,
