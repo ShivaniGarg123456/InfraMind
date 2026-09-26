@@ -56,24 +56,6 @@ def classify_complaint(complaint):
             "department": department,
             "priority": "Critical"
         }
-
-    # ---------------------------------------------------------
-    # HIGH - IT / LAB
-    # ---------------------------------------------------------
-    if any(keyword in text for keyword in [
-        "computer",
-        "computers",
-        "pc",
-        "desktop",
-        "laptop",
-        "server"
-    ]):
-        return {
-            "category": "Lab",
-            "department": "IT",
-            "priority": "High"
-        }
-
     # ---------------------------------------------------------
     # HIGH - NETWORK
     # ---------------------------------------------------------
@@ -87,6 +69,22 @@ def classify_complaint(complaint):
     ]):
         return {
             "category": "Network",
+            "department": "IT",
+            "priority": "High"
+        }
+    # ---------------------------------------------------------
+    # HIGH - IT / LAB
+    # ---------------------------------------------------------
+    if any(keyword in text for keyword in [
+        "computer",
+        "computers",
+        "pc",
+        "desktop",
+        "laptop",
+        "server"
+    ]):
+        return {
+            "category": "Lab",
             "department": "IT",
             "priority": "High"
         }

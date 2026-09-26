@@ -1,20 +1,23 @@
 from flask import Flask, request, jsonify
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime
 import sys
 import os
 
-# Allow Python to access the ai folder
-sys.path.append(
+# Allow Python to access the project folders
+sys.path.insert(
+    0,
     os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..")
     )
 )
 
 from ai.classifier import classify_complaint
+from automation.deadline import calculate_deadline
 from automation.scheduler import start_scheduler
 from automation.analytics import get_analytics_summary
 from automation.notifications import notify_new_complaint
+
 
 DEPARTMENT_EMAILS = {
     "IT": "kashishchauhan616@gmail.com",
@@ -25,6 +28,7 @@ DEPARTMENT_EMAILS = {
     "Electrical": "24cse2048@mvn.edu.in",
     "Security": "24cse2048@mvn.edu.in",
 }
+
 
 app = Flask(__name__)
 
@@ -45,58 +49,78 @@ def home():
 def create_complaint():
 
     data = request.get_json()
+
     student_id = data.get("student_id")
     title = data.get("title")
     description = data.get("description")
 
     ai_result = classify_complaint(description)
+
     category = ai_result["category"]
     department = ai_result["department"]
     priority = ai_result["priority"]
 
     status = "Pending"
-    now = datetime.now().isoformat()
 
-    if priority == "Critical":
-        deadline = datetime.now() + timedelta(hours=4)
-    elif priority == "High":
-        deadline = datetime.now() + timedelta(hours=24)
-    elif priority == "Medium":
-        deadline = datetime.now() + timedelta(days=2)
-    else:
-        deadline = datetime.now() + timedelta(days=5)
+    # Create complaint time
+    created_at = datetime.now()
+    now = created_at.isoformat()
 
-    deadline = deadline.isoformat()
+    # Calculate deadline using automation SLA rules
+    deadline = calculate_deadline(
+        priority,
+        created_at
+    ).isoformat()
 
     conn = get_db()
 
-    conn.execute("""
+    conn.execute(
+        """
         INSERT INTO complaints
         (student_id, title, description, category, department,
          priority, status, deadline, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        student_id, title, description, category, department,
-        priority, status, deadline, now, now
-    ))
+        """,
+        (
+            student_id,
+            title,
+            description,
+            category,
+            department,
+            priority,
+            status,
+            deadline,
+            now,
+            now
+        )
+    )
 
     conn.commit()
 
-    new_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    new_id = conn.execute(
+        "SELECT last_insert_rowid()"
+    ).fetchone()[0]
 
     conn.close()
 
-    department_email = DEPARTMENT_EMAILS.get(department, "24cse2048@mvn.edu.in")
+    # Notify respective department
+    department_email = DEPARTMENT_EMAILS.get(
+        department,
+        "24cse2048@mvn.edu.in"
+    )
 
-    notify_new_complaint(department_email, {
-        "id": new_id,
-        "title": title,
-        "description": description,
-        "category": category,
-        "priority": priority,
-        "deadline": deadline,
-        "status": status
-    })
+    notify_new_complaint(
+        department_email,
+        {
+            "id": new_id,
+            "title": title,
+            "description": description,
+            "category": category,
+            "priority": priority,
+            "deadline": deadline,
+            "status": status
+        }
+    )
 
     return jsonify({
         "message": "Complaint created successfully",
@@ -108,9 +132,12 @@ def create_complaint():
     }), 201
 
 
+# ANALYTICS
 @app.route("/analytics", methods=["GET"])
 def analytics():
     return jsonify(get_analytics_summary())
+
+
 # GET ALL COMPLAINTS
 @app.route("/complaints", methods=["GET"])
 def get_complaints():
@@ -154,7 +181,6 @@ def update_status(complaint_id):
     data = request.get_json()
     new_status = data.get("status")
 
-    # Allowed statuses
     allowed_statuses = [
         "Pending",
         "In Progress",
@@ -163,7 +189,6 @@ def update_status(complaint_id):
         "Escalated"
     ]
 
-    # Validate status
     if new_status not in allowed_statuses:
         return jsonify({
             "error": "Invalid status",
@@ -172,7 +197,6 @@ def update_status(complaint_id):
 
     conn = get_db()
 
-    # Check if complaint exists
     complaint = conn.execute(
         "SELECT * FROM complaints WHERE id = ?",
         (complaint_id,)
@@ -185,7 +209,6 @@ def update_status(complaint_id):
             "error": "Complaint not found"
         }), 404
 
-    # Update status
     conn.execute(
         """
         UPDATE complaints
@@ -208,10 +231,14 @@ def update_status(complaint_id):
         "status": new_status
     })
 
-start_scheduler()
+
 if __name__ == "__main__":
+
+    start_scheduler()
+
     app.run(
         host="0.0.0.0",
         port=5000,
-        debug=True
+        debug=True,
+        use_reloader=False
     )
