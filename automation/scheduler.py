@@ -1,40 +1,65 @@
 """
-Background scheduler — periodically checks complaints for deadline breaches.
-Call start_scheduler() once when the FastAPI app starts.
+Background scheduler — periodically checks complaints in inframind.db
+for deadline breaches, marks them Overdue, then Escalated.
 """
 
+import sqlite3
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
-from automation.sla_config import STATUS_PENDING, STATUS_IN_PROGRESS, STATUS_OVERDUE, STATUS_RESOLVED
 from automation.escalation import escalate_complaint
+from automation.notifications import notify_deadline_approaching
 
-def get_active_complaints():
-    """
-    Should return list of complaints with status Pending or In Progress.
-    Placeholder — Member 2 (backend) should wire this to actual DB query.
-    """
-    return []
+ADMIN_EMAIL = "admin@inframind.com"  # TODO: replace with real admin email
+
+
+def get_db():
+    conn = sqlite3.connect("inframind.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def mark_overdue(complaint_id: int):
+    conn = get_db()
+    now = datetime.now().isoformat()
+    conn.execute(
+        "UPDATE complaints SET status = ?, updated_at = ? WHERE id = ?",
+        ("Overdue", now, complaint_id)
+    )
+    conn.commit()
+    conn.close()
 
 
 def check_deadlines():
-    complaints = get_active_complaints()
+    conn = get_db()
+
+    # Only check complaints that are still active (not Resolved/Escalated)
+    complaints = conn.execute(
+        """
+        SELECT * FROM complaints
+        WHERE status IN ('Pending', 'In Progress', 'Overdue')
+        """
+    ).fetchall()
+
+    conn.close()
+
     now = datetime.now()
 
-    for complaint in complaints:
-        # Skip if already resolved
-        if complaint["status"] == STATUS_RESOLVED:
-            continue
+    for row in complaints:
+        complaint = dict(row)
 
-        if now > complaint["deadline"]:
-            # Step 1: Mark as Overdue if not already
-            if complaint["status"] in [STATUS_PENDING, STATUS_IN_PROGRESS]:
-                complaint["status"] = STATUS_OVERDUE
-                # TODO: Save updated status to DB here
+        if not complaint["deadline"]:
+            continue  # skip if deadline missing
 
-            # Step 2: Escalate if overdue and not yet escalated
-            if complaint["status"] == STATUS_OVERDUE and not complaint.get("is_escalated"):
-                escalate_complaint(complaint, admin_email="admin@inframind.com")
-                # TODO: Save updated complaint back to DB here
+        deadline = datetime.fromisoformat(complaint["deadline"])
+
+        if now > deadline:
+            if complaint["status"] in ["Pending", "In Progress"]:
+                mark_overdue(complaint["id"])
+                print(f"Complaint #{complaint['id']} marked Overdue")
+
+            # Escalate (whether it was just marked Overdue or already was)
+            escalate_complaint(complaint["id"], ADMIN_EMAIL)
+            print(f"Complaint #{complaint['id']} escalated")
 
 
 def start_scheduler():
