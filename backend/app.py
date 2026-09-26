@@ -12,6 +12,8 @@ sys.path.append(
 )
 
 from ai.classifier import classify_complaint
+from automation.scheduler import start_scheduler
+from automation.analytics import get_analytics_summary
 
 app = Flask(__name__)
 
@@ -94,7 +96,9 @@ def create_complaint():
         "deadline": deadline
     }), 201
 
-
+@app.route("/analytics", methods=["GET"])
+def analytics():
+    return jsonify(get_analytics_summary())
 # GET ALL COMPLAINTS
 @app.route("/complaints", methods=["GET"])
 def get_complaints():
@@ -192,7 +196,7 @@ def update_status(complaint_id):
         "status": new_status
     })
 
-
+start_scheduler()
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
