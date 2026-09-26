@@ -1,6 +1,17 @@
 from flask import Flask, request, jsonify
 import sqlite3
 from datetime import datetime, timedelta
+import sys
+import os
+
+# Allow Python to access the ai folder
+sys.path.append(
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..")
+    )
+)
+
+from ai.classifier import classify_complaint
 
 app = Flask(__name__)
 
@@ -26,14 +37,17 @@ def create_complaint():
     title = data.get("title")
     description = data.get("description")
 
-    # Temporary AI output
-    category = "Lab"
-    department = "IT"
-    priority = "High"
+    # AI complaint classification
+    ai_result = classify_complaint(description)
+
+    category = ai_result["category"]
+    department = ai_result["department"]
+    priority = ai_result["priority"]
 
     status = "Pending"
     now = datetime.now().isoformat()
-        # Calculate deadline based on priority
+
+    # Calculate deadline based on AI priority
     if priority == "Critical":
         deadline = datetime.now() + timedelta(hours=4)
 
@@ -49,34 +63,37 @@ def create_complaint():
     deadline = deadline.isoformat()
 
     conn = get_db()
+
     conn.execute("""
-    INSERT INTO complaints
-    (student_id, title, description, category, department,
-     priority, status, deadline, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-""", (
-    student_id,
-    title,
-    description,
-    category,
-    department,
-    priority,
-    status,
-    deadline,
-    now,
-    now
-))
+        INSERT INTO complaints
+        (student_id, title, description, category, department,
+         priority, status, deadline, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        student_id,
+        title,
+        description,
+        category,
+        department,
+        priority,
+        status,
+        deadline,
+        now,
+        now
+    ))
+
     conn.commit()
     conn.close()
 
     return jsonify({
-    "message": "Complaint created successfully",
-    "category": category,
-    "department": department,
-    "priority": priority,
-    "status": status,
-    "deadline": deadline
-}), 201
+        "message": "Complaint created successfully",
+        "category": category,
+        "department": department,
+        "priority": priority,
+        "status": status,
+        "deadline": deadline
+    }), 201
+
 
 # GET ALL COMPLAINTS
 @app.route("/complaints", methods=["GET"])
