@@ -9,7 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from automation.escalation import escalate_complaint
 from automation.notifications import notify_deadline_approaching
 
-ADMIN_EMAIL = "admin@inframind.com"  # TODO: replace with real admin email
+ADMIN_EMAIL = "24cse2048@mvn.edu.in"  # TODO: replace with real admin email
 
 
 def get_db():
