@@ -14,6 +14,17 @@ sys.path.append(
 from ai.classifier import classify_complaint
 from automation.scheduler import start_scheduler
 from automation.analytics import get_analytics_summary
+from automation.notifications import notify_new_complaint
+
+DEPARTMENT_EMAILS = {
+    "IT": "kashishchauhan616@gmail.com",
+    "Maintenance": "24cse2048@mvn.edu.in",
+    "Hostel": "24cse2048@mvn.edu.in",
+    "Library": "24cse2048@mvn.edu.in",
+    "Transport": "24cse2048@mvn.edu.in",
+    "Electrical": "24cse2048@mvn.edu.in",
+    "Security": "24cse2048@mvn.edu.in",
+}
 
 app = Flask(__name__)
 
@@ -85,16 +96,34 @@ def create_complaint():
     ))
 
     conn.commit()
-    conn.close()
 
-    return jsonify({
-        "message": "Complaint created successfully",
-        "category": category,
-        "department": department,
-        "priority": priority,
-        "status": status,
-        "deadline": deadline
-    }), 201
+# Get the newly created complaint's ID
+new_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+conn.close()
+
+# Send notification to department
+department_email = DEPARTMENT_EMAILS.get(department, "admin@college.edu")
+
+notify_new_complaint(department_email, {
+    "id": new_id,
+    "title": title,
+    "description": description,
+    "category": category,
+    "priority": priority,
+    "deadline": deadline,
+    "status": status
+})
+
+return jsonify({
+    "message": "Complaint created successfully",
+    "category": category,
+    "department": department,
+    "priority": priority,
+    "status": status,
+    "deadline": deadline
+}), 201
+
 
 @app.route("/analytics", methods=["GET"])
 def analytics():
