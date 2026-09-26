@@ -7,10 +7,15 @@ import smtplib
 from email.mime.text import MIMEText
 
 # TODO: Move these to environment variables (.env) before pushing real credentials
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SENDER_EMAIL = "your_email@gmail.com"
-SENDER_PASSWORD = "your_app_password"   # Use Gmail App Password, not real password
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 
 
 def send_notification(to_email: str, subject: str, body: str):
