@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,46 +10,129 @@
 
 <body>
 
-    <div class="complaints-container">
+```
+<div class="complaints-container">
 
-        <h1>My Complaints</h1>
-        <p>Track your submitted complaints</p>
+    <h1>My Complaints</h1>
+    <p>Track your submitted complaints</p>
 
-        <div class="complaint-card">
-
-            <h2>CSE Lab Computer Issue</h2>
-
-            <p><strong>Category:</strong> IT / Lab</p>
-            <p><strong>Department:</strong> IT Department</p>
-            <p><strong>Priority:</strong> High</p>
-            <p><strong>Status:</strong> <span class="status-pending">Pending</span></p>
-            <p><strong>Deadline:</strong> 24 Hours</p>
-
-        </div>
-
-        <div class="complaint-card">
-
-            <h2>Hostel Water Supply Issue</h2>
-
-            <p><strong>Category:</strong> Hostel</p>
-            <p><strong>Department:</strong> Maintenance</p>
-            <p><strong>Priority:</strong> Medium</p>
-            <p><strong>Status:</strong> <span class="status-progress">In Progress</span></p>
-            <p><strong>Deadline:</strong> 48 Hours</p>
-
-        </div>
-
-        <a href="dashboard.html" class="complaint-btn">
-            Back to Dashboard
-        </a>
-
-        <br>
-
-        <a href="index.html" class="logout-btn">
-            Logout
-        </a>
-
+    <div id="complaintsList">
+        <p>Loading complaints...</p>
     </div>
+
+    <a href="dashboard.html" class="complaint-btn">
+        Back to Dashboard
+    </a>
+
+    <br>
+
+    <a href="index.html" class="logout-btn">
+        Logout
+    </a>
+
+</div>
+
+<script>
+
+    async function loadComplaints() {
+
+        const complaintsList = document.getElementById("complaintsList");
+
+        try {
+
+            const response = await fetch("/complaints");
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch complaints");
+            }
+
+            const complaints = await response.json();
+
+            complaintsList.innerHTML = "";
+
+            if (complaints.length === 0) {
+
+                complaintsList.innerHTML =
+                    "<p>No complaints submitted yet.</p>";
+
+                return;
+            }
+
+            complaints.forEach(function(complaint) {
+
+                let statusClass = "status-pending";
+
+                if (complaint.status === "In Progress") {
+                    statusClass = "status-progress";
+                }
+                else if (complaint.status === "Resolved") {
+                    statusClass = "status-resolved";
+                }
+                else if (complaint.status === "Overdue") {
+                    statusClass = "status-overdue";
+                }
+                else if (complaint.status === "Escalated") {
+                    statusClass = "status-escalated";
+                }
+
+                const card = document.createElement("div");
+
+                card.className = "complaint-card";
+
+                card.innerHTML = `
+                    <h2>${complaint.title}</h2>
+
+                    <p>
+                        <strong>Description:</strong>
+                        ${complaint.description}
+                    </p>
+
+                    <p>
+                        <strong>Category:</strong>
+                        ${complaint.category}
+                    </p>
+
+                    <p>
+                        <strong>Department:</strong>
+                        ${complaint.department}
+                    </p>
+
+                    <p>
+                        <strong>Priority:</strong>
+                        ${complaint.priority}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        <span class="${statusClass}">
+                            ${complaint.status}
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Deadline:</strong>
+                        ${new Date(complaint.deadline).toLocaleString()}
+                    </p>
+                `;
+
+                complaintsList.appendChild(card);
+
+            });
+
+        }
+        catch (error) {
+
+            console.error(error);
+
+            complaintsList.innerHTML =
+                "<p>Could not load complaints. Please make sure the backend is running.</p>";
+        }
+    }
+
+    loadComplaints();
+
+</script>
+```
 
 </body>
 </html>

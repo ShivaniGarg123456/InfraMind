@@ -1,339 +1,513 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>InfraMind - Admin Dashboard</title>
+```
+<title>InfraMind - Admin Dashboard</title>
 
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+```
+
 </head>
 
 <body>
 
-    <div class="admin-container">
+```
+<div class="admin-container">
 
-        <h1>Admin Dashboard</h1>
-        <p>Complaint Management & Analytics</p>
+    <h1>Admin Dashboard</h1>
+    <p>Complaint Management & Analytics</p>
 
-        <div class="admin-cards">
+    <div class="admin-cards">
 
-            <div class="admin-card">
-                <h2>25</h2>
-                <p>Total</p>
-            </div>
-
-            <div class="admin-card">
-                <h2>8</h2>
-                <p>Pending</p>
-            </div>
-
-            <div class="admin-card">
-                <h2>6</h2>
-                <p>In Progress</p>
-            </div>
-
-            <div class="admin-card">
-                <h2>7</h2>
-                <p>Resolved</p>
-            </div>
-
-            <div class="admin-card">
-                <h2>2</h2>
-                <p>Overdue</p>
-            </div>
-
-            <div class="admin-card">
-                <h2>2</h2>
-                <p>Escalated</p>
-            </div>
-
+        <div class="admin-card">
+            <h2 id="total">0</h2>
+            <p>Total</p>
         </div>
 
-
-        <div class="admin-navigation">
-
-            <a href="dashboard.html">Student Dashboard</a>
-
-            <a href="department.html">Department Dashboard</a>
-
-            <a href="index.html">Logout</a>
-
+        <div class="admin-card">
+            <h2 id="pending">0</h2>
+            <p>Pending</p>
         </div>
 
-
-        <!-- Search and Filter -->
-
-        <div class="complaint-controls">
-
-            <input
-                type="text"
-                id="searchComplaint"
-                placeholder="Search complaints..."
-                onkeyup="filterComplaints()"
-            >
-
-            <select id="statusFilter" onchange="filterComplaints()">
-
-                <option value="All">All Status</option>
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Overdue">Overdue</option>
-                <option value="Escalated">Escalated</option>
-
-            </select>
-
+        <div class="admin-card">
+            <h2 id="inProgress">0</h2>
+            <p>In Progress</p>
         </div>
 
-
-        <!-- Complaints Table -->
-
-        <div class="complaints-table-box">
-
-            <h2>All Complaints</h2>
-
-            <table id="complaintsTable">
-
-                <thead>
-
-                    <tr>
-                        <th>Student ID</th>
-                        <th>Complaint</th>
-                        <th>Department</th>
-                        <th>Priority</th>
-                        <th>Status</th>
-                        <th>Deadline</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    <tr>
-                        <td>101</td>
-                        <td>CSE Lab Computer Issue</td>
-                        <td>IT Department</td>
-                        <td>
-                            <span class="priority-high">High</span>
-                        </td>
-                        <td>
-                            <span class="status-pending">Pending</span>
-                        </td>
-                        <td>24 Hours</td>
-                    </tr>
-
-                    <tr>
-                        <td>102</td>
-                        <td>Hostel Water Supply Issue</td>
-                        <td>Maintenance</td>
-                        <td>
-                            <span class="priority-medium">Medium</span>
-                        </td>
-                        <td>
-                            <span class="status-progress">In Progress</span>
-                        </td>
-                        <td>48 Hours</td>
-                    </tr>
-
-                    <tr>
-                        <td>103</td>
-                        <td>Library AC Not Working</td>
-                        <td>Maintenance</td>
-                        <td>
-                            <span class="priority-low">Low</span>
-                        </td>
-                        <td>
-                            <span class="status-resolved">Resolved</span>
-                        </td>
-                        <td>Completed</td>
-                    </tr>
-
-                    <tr>
-                        <td>104</td>
-                        <td>Wi-Fi Connectivity Issue</td>
-                        <td>IT Department</td>
-                        <td>
-                            <span class="priority-critical">Critical</span>
-                        </td>
-                        <td>
-                            <span class="status-pending">Pending</span>
-                        </td>
-                        <td>12 Hours</td>
-                    </tr>
-
-                    <tr>
-                        <td>105</td>
-                        <td>Hostel Room Electricity Issue</td>
-                        <td>Maintenance</td>
-                        <td>
-                            <span class="priority-high">High</span>
-                        </td>
-                        <td>
-                            <span class="status-overdue">Overdue</span>
-                        </td>
-                        <td>Expired</td>
-                    </tr>
-
-                    <tr>
-                        <td>106</td>
-                        <td>Library Book Issue</td>
-                        <td>Library</td>
-                        <td>
-                            <span class="priority-low">Low</span>
-                        </td>
-                        <td>
-                            <span class="status-resolved">Resolved</span>
-                        </td>
-                        <td>Completed</td>
-                    </tr>
-
-                </tbody>
-
-            </table>
-
+        <div class="admin-card">
+            <h2 id="resolved">0</h2>
+            <p>Resolved</p>
         </div>
 
-
-        <!-- Department Chart -->
-
-        <div class="chart-box">
-
-            <h2>Department-wise Complaints</h2>
-
-            <canvas id="departmentChart"></canvas>
-
+        <div class="admin-card">
+            <h2 id="overdue">0</h2>
+            <p>Overdue</p>
         </div>
 
-
-        <!-- Priority Chart -->
-
-        <div class="chart-box">
-
-            <h2>Priority-wise Complaints</h2>
-
-            <canvas id="priorityChart"></canvas>
-
+        <div class="admin-card">
+            <h2 id="escalated">0</h2>
+            <p>Escalated</p>
         </div>
 
     </div>
 
 
-    <script>
+    <div class="admin-navigation">
 
-        function filterComplaints() {
+        <a href="dashboard.html">Student Dashboard</a>
 
-            const searchInput =
-                document.getElementById("searchComplaint").value.toLowerCase();
+        <a href="department.html">Department Dashboard</a>
 
-            const statusFilter =
-                document.getElementById("statusFilter").value;
+        <a href="index.html">Logout</a>
 
-            const rows =
-                document.querySelectorAll("#complaintsTable tbody tr");
+    </div>
 
 
-            rows.forEach(function(row) {
+    <!-- Search and Filter -->
 
-                const studentId =
-                    row.cells[0].textContent.toLowerCase();
+    <div class="complaint-controls">
 
-                const complaint =
-                    row.cells[1].textContent.toLowerCase();
+        <input
+            type="text"
+            id="searchComplaint"
+            placeholder="Search complaints..."
+            onkeyup="filterComplaints()"
+        >
 
-                const status =
-                    row.cells[4].textContent.trim();
+        <select id="statusFilter" onchange="filterComplaints()">
 
+            <option value="All">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Overdue">Overdue</option>
+            <option value="Escalated">Escalated</option>
+
+        </select>
+
+    </div>
+
+
+    <!-- Complaints Table -->
+
+    <div class="complaints-table-box">
+
+        <h2>All Complaints</h2>
+
+        <table id="complaintsTable">
+
+            <thead>
+
+                <tr>
+                    <th>Student ID</th>
+                    <th>Complaint</th>
+                    <th>Department</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Deadline</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="complaintsBody">
+
+                <tr>
+                    <td colspan="6">Loading complaints...</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- Department Chart -->
+
+    <div class="chart-box">
+
+        <h2>Department-wise Complaints</h2>
+
+        <canvas id="departmentChart"></canvas>
+
+    </div>
+
+
+    <!-- Priority Chart -->
+
+    <div class="chart-box">
+
+        <h2>Priority-wise Complaints</h2>
+
+        <canvas id="priorityChart"></canvas>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let complaints = [];
+
+    let departmentChart;
+    let priorityChart;
+
+
+    async function loadAdminDashboard() {
+
+        try {
+
+            // Get analytics
+            const analyticsResponse =
+                await fetch("/analytics");
+
+            const analytics =
+                await analyticsResponse.json();
+
+
+            // Update cards
+            document.getElementById("total").textContent =
+                analytics.total;
+
+            document.getElementById("pending").textContent =
+                analytics.pending;
+
+            document.getElementById("inProgress").textContent =
+                analytics.in_progress;
+
+            document.getElementById("resolved").textContent =
+                analytics.resolved;
+
+            document.getElementById("overdue").textContent =
+                analytics.overdue;
+
+            document.getElementById("escalated").textContent =
+                analytics.escalated;
+
+
+            // Get all complaints
+            const complaintsResponse =
+                await fetch("/complaints");
+
+            complaints =
+                await complaintsResponse.json();
+
+
+            displayComplaints(complaints);
+
+            createCharts(analytics);
+
+
+        }
+        catch (error) {
+
+            console.error("Admin dashboard error:", error);
+
+            document.getElementById("complaintsBody").innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        Could not load complaints.
+                    </td>
+                </tr>
+            `;
+
+        }
+
+    }
+
+
+    function displayComplaints(data) {
+
+        const tbody =
+            document.getElementById("complaintsBody");
+
+        tbody.innerHTML = "";
+
+
+        if (data.length === 0) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        No complaints found.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+
+        data.forEach(function(complaint) {
+
+            const row =
+                document.createElement("tr");
+
+
+            let priorityClass =
+                "priority-low";
+
+            if (complaint.priority === "Critical") {
+                priorityClass = "priority-critical";
+            }
+            else if (complaint.priority === "High") {
+                priorityClass = "priority-high";
+            }
+            else if (complaint.priority === "Medium") {
+                priorityClass = "priority-medium";
+            }
+
+
+            let statusClass =
+                "status-pending";
+
+            if (complaint.status === "In Progress") {
+                statusClass = "status-progress";
+            }
+            else if (complaint.status === "Resolved") {
+                statusClass = "status-resolved";
+            }
+            else if (complaint.status === "Overdue") {
+                statusClass = "status-overdue";
+            }
+            else if (complaint.status === "Escalated") {
+                statusClass = "status-escalated";
+            }
+
+
+            let deadline = "N/A";
+
+            if (complaint.deadline) {
+
+                deadline =
+                    new Date(
+                        complaint.deadline
+                    ).toLocaleString();
+
+            }
+
+
+            row.innerHTML = `
+
+                <td>${complaint.student_id}</td>
+
+                <td>${complaint.title}</td>
+
+                <td>${complaint.department}</td>
+
+                <td>
+                    <span class="${priorityClass}">
+                        ${complaint.priority}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="${statusClass}">
+                        ${complaint.status}
+                    </span>
+                </td>
+
+                <td>${deadline}</td>
+
+            `;
+
+
+            tbody.appendChild(row);
+
+        });
+
+    }
+
+
+    function filterComplaints() {
+
+        const searchInput =
+            document
+                .getElementById("searchComplaint")
+                .value
+                .toLowerCase();
+
+
+        const statusFilter =
+            document
+                .getElementById("statusFilter")
+                .value;
+
+
+        const filtered =
+            complaints.filter(function(complaint) {
 
                 const matchesSearch =
-                    studentId.includes(searchInput) ||
-                    complaint.includes(searchInput);
+
+                    String(complaint.student_id)
+                        .toLowerCase()
+                        .includes(searchInput)
+
+                    ||
+
+                    complaint.title
+                        .toLowerCase()
+                        .includes(searchInput)
+
+                    ||
+
+                    complaint.department
+                        .toLowerCase()
+                        .includes(searchInput);
+
 
                 const matchesStatus =
-                    statusFilter === "All" ||
-                    status === statusFilter;
+                    statusFilter === "All"
+                    ||
+                    complaint.status === statusFilter;
 
 
-                if (matchesSearch && matchesStatus) {
+                return matchesSearch && matchesStatus;
 
-                    row.style.display = "";
+            });
 
-                } else {
 
-                    row.style.display = "none";
+        displayComplaints(filtered);
+
+    }
+
+
+    function createCharts(analytics) {
+
+        const departmentData =
+            analytics.department_wise || {};
+
+        const priorityData =
+            analytics.priority_wise || {};
+
+
+        const departmentLabels =
+            Object.keys(departmentData);
+
+        const departmentValues =
+            Object.values(departmentData);
+
+
+        const priorityLabels =
+            Object.keys(priorityData);
+
+        const priorityValues =
+            Object.values(priorityData);
+
+
+        // Department chart
+
+        const departmentCtx =
+            document
+                .getElementById("departmentChart");
+
+
+        if (departmentChart) {
+            departmentChart.destroy();
+        }
+
+
+        departmentChart =
+            new Chart(departmentCtx, {
+
+                type: "bar",
+
+                data: {
+
+                    labels: departmentLabels,
+
+                    datasets: [{
+
+                        label: "Complaints",
+
+                        data: departmentValues,
+
+                        borderWidth: 1
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            ticks: {
+                                stepSize: 1
+                            }
+
+                        }
+
+                    }
 
                 }
 
             });
 
+
+        // Priority chart
+
+        const priorityCtx =
+            document
+                .getElementById("priorityChart");
+
+
+        if (priorityChart) {
+            priorityChart.destroy();
         }
 
 
-        const ctx =
-            document.getElementById('departmentChart');
+        priorityChart =
+            new Chart(priorityCtx, {
 
-        new Chart(ctx, {
+                type: "doughnut",
 
-            type: 'bar',
+                data: {
 
-            data: {
+                    labels: priorityLabels,
 
-                labels: [
-                    'IT',
-                    'Maintenance',
-                    'Hostel',
-                    'Library'
-                ],
+                    datasets: [{
 
-                datasets: [{
+                        label: "Complaints",
 
-                    label: 'Complaints',
+                        data: priorityValues,
 
-                    data: [8, 6, 5, 3],
+                        borderWidth: 1
 
-                    borderWidth: 1
+                    }]
 
-                }]
+                },
 
-            }
+                options: {
 
-        });
+                    responsive: true
+
+                }
+
+            });
+
+    }
 
 
-        const priorityCtx =
-            document.getElementById('priorityChart');
+    // Load dashboard when page opens
+    loadAdminDashboard();
 
-        new Chart(priorityCtx, {
-
-            type: 'doughnut',
-
-            data: {
-
-                labels: [
-                    'Critical',
-                    'High',
-                    'Medium',
-                    'Low'
-                ],
-
-                datasets: [{
-
-                    label: 'Complaints',
-
-                    data: [2, 8, 10, 5],
-
-                    borderWidth: 1
-
-                }]
-
-            }
-
-        });
-
-    </script>
+</script>
+```
 
 </body>
 

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,50 +10,90 @@
 
 <body>
 
-    <div class="dashboard">
+```
+<div class="dashboard">
 
-        <h1>Welcome to InfraMind</h1>
-        <p>Student Dashboard</p>
+    <h1>Welcome to InfraMind</h1>
+    <p>Student Dashboard</p>
 
-        <div class="cards">
+    <div class="cards">
 
-            <div class="card">
-                <h2>2</h2>
-                <p>Total Complaints</p>
-            </div>
-
-            <div class="card">
-                <h2>1</h2>
-                <p>Pending</p>
-            </div>
-
-            <div class="card">
-                <h2>1</h2>
-                <p>In Progress</p>
-            </div>
-
-            <div class="card">
-                <h2>0</h2>
-                <p>Resolved</p>
-            </div>
-
+        <div class="card">
+            <h2 id="totalComplaints">0</h2>
+            <p>Total Complaints</p>
         </div>
 
-        <a href="complaint.html" class="complaint-btn">
-            Submit Complaint
-        </a>
+        <div class="card">
+            <h2 id="pendingComplaints">0</h2>
+            <p>Pending</p>
+        </div>
 
-        <a href="my-complaints.html" class="complaint-btn">
-            My Complaints
-        </a>
+        <div class="card">
+            <h2 id="inProgressComplaints">0</h2>
+            <p>In Progress</p>
+        </div>
 
-        <br>
-
-        <a href="index.html" class="logout-btn">
-            Logout
-        </a>
+        <div class="card">
+            <h2 id="resolvedComplaints">0</h2>
+            <p>Resolved</p>
+        </div>
 
     </div>
+
+    <a href="complaint.html" class="complaint-btn">
+        Submit Complaint
+    </a>
+
+    <a href="my-complaints.html" class="complaint-btn">
+        My Complaints
+    </a>
+
+    <br>
+
+    <a href="index.html" class="logout-btn">
+        Logout
+    </a>
+
+</div>
+
+<script>
+
+    async function loadDashboard() {
+
+        try {
+
+            const response = await fetch("/analytics");
+
+            if (!response.ok) {
+                throw new Error("Failed to load analytics");
+            }
+
+            const data = await response.json();
+
+            document.getElementById("totalComplaints").textContent =
+                data.total;
+
+            document.getElementById("pendingComplaints").textContent =
+                data.pending;
+
+            document.getElementById("inProgressComplaints").textContent =
+                data.in_progress;
+
+            document.getElementById("resolvedComplaints").textContent =
+                data.resolved;
+
+        }
+        catch (error) {
+
+            console.error("Dashboard error:", error);
+
+        }
+    }
+
+    loadDashboard();
+
+</script>
+```
 
 </body>
 </html>

@@ -37,7 +37,7 @@
 
     <script>
 
-        function submitComplaint() {
+        async function submitComplaint() {
 
             const studentId = document.getElementById("studentId").value;
             const title = document.getElementById("complaintTitle").value;
@@ -48,7 +48,49 @@
                 return;
             }
 
-            window.location.href = "my-complaints.html";
+            try {
+
+                const response = await fetch(
+                   "http://127.0.0.1:5000/complaints",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            student_id: Number(studentId),
+                            title: title,
+                            description: description
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.error || "Failed to submit complaint.");
+                    return;
+                }
+
+                alert(
+                    "Complaint submitted successfully!\n\n" +
+                    "Category: " + data.category + "\n" +
+                    "Department: " + data.department + "\n" +
+                    "Priority: " + data.priority + "\n" +
+                    "Status: " + data.status
+                );
+
+                window.location.href = "my-complaints.html";
+
+            } catch (error) {
+
+                console.error("Error:", error);
+
+                alert(
+                    "Could not connect to the backend.\n" +
+                    "Please make sure the Flask server is running."
+                );
+            }
         }
 
     </script>

@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import sqlite3
 from datetime import datetime
 import sys
@@ -30,7 +31,9 @@ DEPARTMENT_EMAILS = {
 }
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend", static_url_path="")
+
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 def get_db():
@@ -41,8 +44,7 @@ def get_db():
 
 @app.route("/")
 def home():
-    return "InfraMind Backend Running!"
-
+    return app.send_static_file("index.html")
 
 # CREATE COMPLAINT
 @app.route("/complaints", methods=["POST"])
