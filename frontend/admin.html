@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>InfraMind - Admin Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="admin-container">
+
+        <h1>Admin Dashboard</h1>
+        <p>Complaint Management & Analytics</p>
+
+        <div class="admin-cards">
+
+            <div class="admin-card">
+                <h2>25</h2>
+                <p>Total</p>
+            </div>
+
+            <div class="admin-card">
+                <h2>8</h2>
+                <p>Pending</p>
+            </div>
+
+            <div class="admin-card">
+                <h2>6</h2>
+                <p>In Progress</p>
+            </div>
+
+            <div class="admin-card">
+                <h2>7</h2>
+                <p>Resolved</p>
+            </div>
+
+            <div class="admin-card">
+                <h2>2</h2>
+                <p>Overdue</p>
+            </div>
+
+            <div class="admin-card">
+                <h2>2</h2>
+                <p>Escalated</p>
+            </div>
+
+        </div>
+
+
+        <div class="admin-navigation">
+
+            <a href="dashboard.html">Student Dashboard</a>
+
+            <a href="department.html">Department Dashboard</a>
+
+            <a href="index.html">Logout</a>
+
+        </div>
+
+
+        <!-- Search and Filter -->
+
+        <div class="complaint-controls">
+
+            <input
+                type="text"
+                id="searchComplaint"
+                placeholder="Search complaints..."
+                onkeyup="filterComplaints()"
+            >
+
+            <select id="statusFilter" onchange="filterComplaints()">
+
+                <option value="All">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Overdue">Overdue</option>
+                <option value="Escalated">Escalated</option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Complaints Table -->
+
+        <div class="complaints-table-box">
+
+            <h2>All Complaints</h2>
+
+            <table id="complaintsTable">
+
+                <thead>
+
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Complaint</th>
+                        <th>Department</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Deadline</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>101</td>
+                        <td>CSE Lab Computer Issue</td>
+                        <td>IT Department</td>
+                        <td>
+                            <span class="priority-high">High</span>
+                        </td>
+                        <td>
+                            <span class="status-pending">Pending</span>
+                        </td>
+                        <td>24 Hours</td>
+                    </tr>
+
+                    <tr>
+                        <td>102</td>
+                        <td>Hostel Water Supply Issue</td>
+                        <td>Maintenance</td>
+                        <td>
+                            <span class="priority-medium">Medium</span>
+                        </td>
+                        <td>
+                            <span class="status-progress">In Progress</span>
+                        </td>
+                        <td>48 Hours</td>
+                    </tr>
+
+                    <tr>
+                        <td>103</td>
+                        <td>Library AC Not Working</td>
+                        <td>Maintenance</td>
+                        <td>
+                            <span class="priority-low">Low</span>
+                        </td>
+                        <td>
+                            <span class="status-resolved">Resolved</span>
+                        </td>
+                        <td>Completed</td>
+                    </tr>
+
+                    <tr>
+                        <td>104</td>
+                        <td>Wi-Fi Connectivity Issue</td>
+                        <td>IT Department</td>
+                        <td>
+                            <span class="priority-critical">Critical</span>
+                        </td>
+                        <td>
+                            <span class="status-pending">Pending</span>
+                        </td>
+                        <td>12 Hours</td>
+                    </tr>
+
+                    <tr>
+                        <td>105</td>
+                        <td>Hostel Room Electricity Issue</td>
+                        <td>Maintenance</td>
+                        <td>
+                            <span class="priority-high">High</span>
+                        </td>
+                        <td>
+                            <span class="status-overdue">Overdue</span>
+                        </td>
+                        <td>Expired</td>
+                    </tr>
+
+                    <tr>
+                        <td>106</td>
+                        <td>Library Book Issue</td>
+                        <td>Library</td>
+                        <td>
+                            <span class="priority-low">Low</span>
+                        </td>
+                        <td>
+                            <span class="status-resolved">Resolved</span>
+                        </td>
+                        <td>Completed</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- Department Chart -->
+
+        <div class="chart-box">
+
+            <h2>Department-wise Complaints</h2>
+
+            <canvas id="departmentChart"></canvas>
+
+        </div>
+
+
+        <!-- Priority Chart -->
+
+        <div class="chart-box">
+
+            <h2>Priority-wise Complaints</h2>
+
+            <canvas id="priorityChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function filterComplaints() {
+
+            const searchInput =
+                document.getElementById("searchComplaint").value.toLowerCase();
+
+            const statusFilter =
+                document.getElementById("statusFilter").value;
+
+            const rows =
+                document.querySelectorAll("#complaintsTable tbody tr");
+
+
+            rows.forEach(function(row) {
+
+                const studentId =
+                    row.cells[0].textContent.toLowerCase();
+
+                const complaint =
+                    row.cells[1].textContent.toLowerCase();
+
+                const status =
+                    row.cells[4].textContent.trim();
+
+
+                const matchesSearch =
+                    studentId.includes(searchInput) ||
+                    complaint.includes(searchInput);
+
+                const matchesStatus =
+                    statusFilter === "All" ||
+                    status === statusFilter;
+
+
+                if (matchesSearch && matchesStatus) {
+
+                    row.style.display = "";
+
+                } else {
+
+                    row.style.display = "none";
+
+                }
+
+            });
+
+        }
+
+
+        const ctx =
+            document.getElementById('departmentChart');
+
+        new Chart(ctx, {
+
+            type: 'bar',
+
+            data: {
+
+                labels: [
+                    'IT',
+                    'Maintenance',
+                    'Hostel',
+                    'Library'
+                ],
+
+                datasets: [{
+
+                    label: 'Complaints',
+
+                    data: [8, 6, 5, 3],
+
+                    borderWidth: 1
+
+                }]
+
+            }
+
+        });
+
+
+        const priorityCtx =
+            document.getElementById('priorityChart');
+
+        new Chart(priorityCtx, {
+
+            type: 'doughnut',
+
+            data: {
+
+                labels: [
+                    'Critical',
+                    'High',
+                    'Medium',
+                    'Low'
+                ],
+
+                datasets: [{
+
+                    label: 'Complaints',
+
+                    data: [2, 8, 10, 5],
+
+                    borderWidth: 1
+
+                }]
+
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>

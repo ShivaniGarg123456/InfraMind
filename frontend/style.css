@@ -1,0 +1,676 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container {
+    background: white;
+    width: 380px;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.login-container h1 {
+    color: #2563eb;
+    margin-bottom: 10px;
+}
+
+.login-container p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.dashboard {
+    width: 90%;
+    max-width: 1100px;
+    margin: auto;
+    text-align: center;
+}
+
+.dashboard h1 {
+    color: #2563eb;
+    margin-bottom: 10px;
+}
+
+.dashboard > p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 25px 15px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+    color: #2563eb;
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.card p {
+    color: #555;
+}
+.complaint-container {
+    background: white;
+    width: 500px;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.complaint-container h1 {
+    color: #2563eb;
+    margin-bottom: 10px;
+}
+
+.complaint-container p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.complaint-container input,
+.complaint-container textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.complaint-container textarea {
+    height: 130px;
+    resize: vertical;
+}
+
+.complaint-container button {
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.complaints-container {
+    width: 90%;
+    max-width: 900px;
+    margin: 50px auto;
+}
+
+.complaints-container h1 {
+    color: #2563eb;
+    margin-bottom: 10px;
+}
+
+.complaints-container > p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.complaint-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.complaint-card h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.complaint-card p {
+    margin-bottom: 12px;
+    color: #555;
+}
+.department-container {
+    width: 90%;
+    max-width: 900px;
+    margin: 50px auto;
+}
+
+.department-container h1 {
+    color: #2563eb;
+    margin-bottom: 10px;
+}
+
+.department-container > p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.department-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.department-card h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.department-card p {
+    color: #555;
+    margin-bottom: 12px;
+}
+
+.department-card button {
+    padding: 10px 16px;
+    margin-right: 8px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+.admin-container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 50px auto;
+}
+
+.admin-container h1 {
+    color: #2563eb;
+    margin-bottom: 10px;
+}
+
+.admin-container > p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.admin-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.admin-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.admin-card h2 {
+    color: #2563eb;
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.admin-card p {
+    color: #555;
+}
+.chart-box {
+    background: white;
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.chart-box h2 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 20px;
+}
+
+.chart-box canvas {
+    max-height: 250px;
+}
+.complaint-btn {
+    display: inline-block;
+    margin: 25px 15px;
+}
+.admin-navigation {
+    margin: 25px 0;
+}
+
+.admin-navigation a {
+    display: inline-block;
+    text-decoration: none;
+    margin: 10px;
+    padding: 12px 20px;
+    background: #007bff;
+    color: white;
+    border-radius: 8px;
+}
+.department-card button {
+    margin: 5px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #007bff;
+    color: white;
+}
+.dashboard .card {
+    transition: 0.2s;
+}
+
+.dashboard .card:hover {
+    transform: translateY(-5px);
+}
+.complaint-container textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+.complaint-card {
+    transition: 0.2s;
+}
+
+.complaint-card:hover {
+    transform: translateY(-3px);
+}
+.login-container input {
+    box-sizing: border-box;
+}
+.admin-card {
+    transition: 0.2s;
+}
+
+.login-container button {
+    display: block;
+    width: 100%;
+    margin: 12px 0;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.login-container button:first-of-type {
+    margin-top: 25px;
+}
+
+.login-container button:hover {
+    transform: translateY(-2px);
+    transition: 0.2s;
+}
+.login-container button:first-of-type {
+    background: #007bff;
+    color: white;
+}
+
+.login-container button:last-of-type {
+    background: #343a40;
+    color: white;
+}
+.login-container h1 {
+    margin-bottom: 10px;
+    font-size: 36px;
+}
+
+.login-container p {
+    margin-bottom: 25px;
+    color: #666;
+}
+.dashboard h1 {
+    margin-bottom: 8px;
+}
+
+.dashboard > p {
+    margin-bottom: 25px;
+    color: #666;
+}
+.department-container h1 {
+    margin-bottom: 8px;
+}
+
+.department-container > p {
+    margin-bottom: 25px;
+    color: #666;
+}
+.department-container h1 {
+    font-size: 32px;
+}
+
+.department-container > p {
+    font-size: 17px;
+}
+.admin-container h1 {
+    margin-bottom: 8px;
+    font-size: 32px;
+}
+
+.admin-container > p {
+    margin-bottom: 25px;
+    color: #666;
+    font-size: 17px;
+}
+.department-card button:nth-of-type(1) {
+    background: #f0ad4e;
+}
+
+.department-card button:nth-of-type(2) {
+    background: #007bff;
+}
+
+.department-card button:nth-of-type(3) {
+    background: #28a745;
+}
+.status-pending {
+    color: #f0ad4e;
+    font-weight: 600;
+}
+
+.status-progress {
+    color: #007bff;
+    font-weight: 600;
+}
+.complaints-container h1 {
+    margin-bottom: 8px;
+    font-size: 32px;
+}
+
+.complaints-container > p {
+    margin-bottom: 25px;
+    color: #666;
+    font-size: 17px;
+}
+.status-resolved {
+    color: #28a745;
+    font-weight: 600;
+}
+.logout-btn {
+    display: inline-block;
+    margin: 20px 10px;
+    padding: 10px 20px;
+    text-decoration: none;
+    background: #dc3545;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.logout-btn:hover {
+    background: #c82333;
+}
+/* ============================= */
+/* Admin Complaints Section      */
+/* ============================= */
+
+.complaint-controls {
+    display: flex;
+    gap: 15px;
+    margin: 30px 0 20px;
+    align-items: center;
+}
+
+.complaint-controls input {
+    flex: 1;
+    padding: 13px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+.complaint-controls select {
+    padding: 13px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    background: white;
+    cursor: pointer;
+}
+
+
+/* Complaints Table */
+
+.complaints-table-box {
+    background: white;
+    margin-top: 20px;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+.complaints-table-box h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 22px;
+}
+
+.complaints-table-box table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 750px;
+}
+
+.complaints-table-box th {
+    background: #f5f7fa;
+    color: #333;
+    font-weight: 600;
+    padding: 14px 12px;
+    text-align: left;
+    border-bottom: 2px solid #e5e5e5;
+}
+
+.complaints-table-box td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+.complaints-table-box tbody tr:hover {
+    background: #f8fbff;
+}
+
+
+/* Priority Badges */
+
+.complaints-table-box td:nth-child(4) {
+    font-weight: 600;
+}
+
+
+/* Status Badges */
+
+.complaints-table-box td:nth-child(5) {
+    font-weight: 600;
+}
+
+
+/* Search box focus */
+
+.complaint-controls input:focus,
+.complaint-controls select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+/* Priority Badges */
+
+.priority-critical,
+.priority-high,
+.priority-medium,
+.priority-low,
+.status-pending,
+.status-progress,
+.status-resolved,
+.status-overdue {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* Priority */
+
+.priority-critical {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.priority-high {
+    background: #ffe5b4;
+    color: #8a4b00;
+}
+
+.priority-medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.priority-low {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+
+/* Status */
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-progress {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-resolved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-overdue {
+    background: #f8d7da;
+    color: #721c24;
+}
+/* ============================= */
+/* Professional Login Page       */
+/* ============================= */
+
+.login-container {
+    width: 380px;
+    max-width: 90%;
+    margin: 70px auto;
+    padding: 35px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.login-container h1 {
+    margin-bottom: 8px;
+    font-size: 38px;
+    color: #007bff;
+}
+
+.login-container > p {
+    margin-bottom: 25px;
+    color: #666;
+    font-size: 15px;
+}
+
+.login-container h2 {
+    margin-top: 25px;
+    margin-bottom: 15px;
+    font-size: 20px;
+    color: #333;
+    text-align: left;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 13px 14px;
+    margin-bottom: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+.login-container input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.login-container button {
+    width: 100%;
+    padding: 13px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.login-container button:first-of-type {
+    background: #007bff;
+    color: white;
+}
+
+.login-container button:last-of-type {
+    background: #343a40;
+    color: white;
+}
+
+.login-container button:hover {
+    transform: translateY(-2px);
+}
+
+#loginMessage {
+    margin-top: 15px;
+    color: #dc3545;
+    font-weight: 600;
+}
