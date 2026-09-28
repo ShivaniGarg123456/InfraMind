@@ -3,76 +3,416 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<title>InfraMind - Admin Dashboard</title>
+    <title>InfraMind - Admin Dashboard</title>
 
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-```
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <style>
+
+        /* =========================
+           ADD DEPARTMENT TAG
+        ========================= */
+
+        .add-department-tag {
+
+            display: inline-block;
+
+            margin: 25px 0;
+
+            padding: 12px 22px;
+
+            background: #2563eb;
+
+            color: white;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            transition: 0.2s;
+
+        }
+
+
+        .add-department-tag:hover {
+
+            background: #1d4ed8;
+
+        }
+
+
+
+        /* =========================
+           DEPARTMENT FORM
+        ========================= */
+
+        .department-form {
+
+            display: none;
+
+            background: white;
+
+            padding: 30px;
+
+            margin-bottom: 30px;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 4px 18px rgba(0, 0, 0, 0.08);
+
+            max-width: 500px;
+
+        }
+
+
+        .department-form h2 {
+
+            margin-top: 0;
+
+            margin-bottom: 22px;
+
+        }
+
+
+        .department-form input {
+
+            display: block;
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            padding: 12px 14px;
+
+            margin-bottom: 15px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 7px;
+
+            font-size: 15px;
+
+            outline: none;
+
+        }
+
+
+        .department-form input:focus {
+
+            border-color: #2563eb;
+
+        }
+
+
+
+        /* =========================
+           DEPARTMENT FORM BUTTONS
+        ========================= */
+
+        .department-form-buttons {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 5px;
+
+        }
+
+
+        .department-form-buttons button {
+
+            padding: 11px 18px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+        }
+
+
+        .create-department {
+
+            background: #2563eb;
+
+            color: white;
+
+        }
+
+
+        .create-department:hover {
+
+            background: #1d4ed8;
+
+        }
+
+
+        .cancel-department {
+
+            background: #e5e7eb;
+
+            color: #333;
+
+        }
+
+
+        .cancel-department:hover {
+
+            background: #d1d5db;
+
+        }
+
+
+        #departmentMessage {
+
+            margin-top: 15px;
+
+            font-size: 14px;
+
+        }
+
+
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
+        .admin-logout {
+
+            margin-top: 45px;
+
+            padding-bottom: 30px;
+
+            text-align: center;
+
+        }
+
+
+        .admin-logout a {
+
+            display: inline-block;
+
+            padding: 12px 30px;
+
+            background: #dc2626;
+
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 8px;
+
+            font-weight: bold;
+
+            transition: 0.2s;
+
+        }
+
+
+        .admin-logout a:hover {
+
+            background: #b91c1c;
+
+        }
+
+    </style>
 
 </head>
 
+
 <body>
 
-```
+
 <div class="admin-container">
 
+
+    <!-- =========================
+         ADMIN HEADING
+    ========================= -->
+
     <h1>Admin Dashboard</h1>
+
     <p>Complaint Management & Analytics</p>
+
+
+
+    <!-- =========================
+         ADMIN CARDS
+    ========================= -->
 
     <div class="admin-cards">
 
+
         <div class="admin-card">
+
             <h2 id="total">0</h2>
+
             <p>Total</p>
+
         </div>
 
+
         <div class="admin-card">
+
             <h2 id="pending">0</h2>
+
             <p>Pending</p>
+
         </div>
 
+
         <div class="admin-card">
+
             <h2 id="inProgress">0</h2>
+
             <p>In Progress</p>
+
         </div>
 
+
         <div class="admin-card">
+
             <h2 id="resolved">0</h2>
+
             <p>Resolved</p>
+
         </div>
 
+
         <div class="admin-card">
+
             <h2 id="overdue">0</h2>
+
             <p>Overdue</p>
+
         </div>
+
 
         <div class="admin-card">
+
             <h2 id="escalated">0</h2>
+
             <p>Escalated</p>
+
         </div>
 
-    </div>
-
-
-    <div class="admin-navigation">
-
-        <a href="dashboard.html">Student Dashboard</a>
-
-        <a href="department.html">Department Dashboard</a>
-
-        <a href="index.html">Logout</a>
 
     </div>
 
 
-    <!-- Search and Filter -->
+
+    <!-- =========================
+         ADD DEPARTMENT TAG
+    ========================= -->
+
+    <div
+        onclick="toggleDepartmentForm()"
+        class="add-department-tag"
+    >
+
+        + Add New Department
+
+    </div>
+
+
+
+    <!-- =========================
+         ADD DEPARTMENT FORM
+    ========================= -->
+
+    <div
+        id="departmentForm"
+        class="department-form"
+    >
+
+
+        <h2>Add New Department</h2>
+
+
+        <input
+            type="text"
+            id="departmentName"
+            placeholder="Department Name"
+        >
+
+
+        <input
+            type="email"
+            id="departmentEmail"
+            placeholder="Department Email"
+        >
+
+
+        <input
+            type="text"
+            id="departmentUsername"
+            placeholder="Department Username"
+        >
+
+
+        <input
+            type="password"
+            id="departmentPassword"
+            placeholder="Department Password"
+        >
+
+
+        <div class="department-form-buttons">
+
+
+            <button
+                onclick="addDepartment()"
+                class="create-department"
+            >
+
+                Create Department
+
+            </button>
+
+
+            <button
+                onclick="toggleDepartmentForm()"
+                class="cancel-department"
+            >
+
+                Cancel
+
+            </button>
+
+
+        </div>
+
+
+        <p id="departmentMessage"></p>
+
+
+    </div>
+
+
+
+    <!-- =========================
+         SEARCH AND FILTER
+    ========================= -->
 
     <div class="complaint-controls">
+
 
         <input
             type="text"
@@ -81,433 +421,1016 @@
             onkeyup="filterComplaints()"
         >
 
-        <select id="statusFilter" onchange="filterComplaints()">
 
-            <option value="All">All Status</option>
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
-            <option value="Overdue">Overdue</option>
-            <option value="Escalated">Escalated</option>
+        <select
+            id="statusFilter"
+            onchange="filterComplaints()"
+        >
+
+            <option value="All">
+                All Status
+            </option>
+
+
+            <option value="Pending">
+                Pending
+            </option>
+
+
+            <option value="In Progress">
+                In Progress
+            </option>
+
+
+            <option value="Resolved">
+                Resolved
+            </option>
+
+
+            <option value="Overdue">
+                Overdue
+            </option>
+
+
+            <option value="Escalated">
+                Escalated
+            </option>
 
         </select>
 
+
     </div>
 
 
-    <!-- Complaints Table -->
+
+    <!-- =========================
+         COMPLAINTS TABLE
+    ========================= -->
 
     <div class="complaints-table-box">
 
+
         <h2>All Complaints</h2>
+
 
         <table id="complaintsTable">
 
+
             <thead>
 
+
                 <tr>
+
                     <th>Student ID</th>
+
                     <th>Complaint</th>
+
                     <th>Department</th>
+
                     <th>Priority</th>
+
                     <th>Status</th>
+
                     <th>Deadline</th>
+
                 </tr>
+
 
             </thead>
 
+
             <tbody id="complaintsBody">
 
+
                 <tr>
-                    <td colspan="6">Loading complaints...</td>
+
+                    <td colspan="6">
+
+                        Loading complaints...
+
+                    </td>
+
                 </tr>
+
 
             </tbody>
 
+
         </table>
+
 
     </div>
 
 
-    <!-- Department Chart -->
+
+    <!-- =========================
+         DEPARTMENT CHART
+    ========================= -->
 
     <div class="chart-box">
+
 
         <h2>Department-wise Complaints</h2>
 
-        <canvas id="departmentChart"></canvas>
+
+        <canvas
+            id="departmentChart"
+        ></canvas>
+
 
     </div>
 
 
-    <!-- Priority Chart -->
+
+    <!-- =========================
+         PRIORITY CHART
+    ========================= -->
 
     <div class="chart-box">
 
+
         <h2>Priority-wise Complaints</h2>
 
-        <canvas id="priorityChart"></canvas>
+
+        <canvas
+            id="priorityChart"
+        ></canvas>
+
 
     </div>
+
+
+
+    <!-- =========================
+         LOGOUT
+    ========================= -->
+
+    <div class="admin-logout">
+
+
+        <a href="index.html">
+
+            Logout
+
+        </a>
+
+
+    </div>
+
 
 </div>
 
 
+
 <script>
+
+
+    // =========================
+    // VARIABLES
+    // =========================
 
     let complaints = [];
 
     let departmentChart;
+
     let priorityChart;
 
 
+
+    // =========================
+    // SHOW / HIDE DEPARTMENT FORM
+    // =========================
+
+    function toggleDepartmentForm() {
+
+
+        const form =
+            document.getElementById(
+                "departmentForm"
+            );
+
+
+        if (
+            form.style.display === "none" ||
+            form.style.display === ""
+        ) {
+
+            form.style.display = "block";
+
+        }
+
+        else {
+
+            form.style.display = "none";
+
+        }
+
+
+    }
+
+
+
+    // =========================
+    // ADD DEPARTMENT
+    // =========================
+
+    function addDepartment() {
+
+
+        const departmentName =
+            document
+                .getElementById(
+                    "departmentName"
+                )
+                .value
+                .trim();
+
+
+        const email =
+            document
+                .getElementById(
+                    "departmentEmail"
+                )
+                .value
+                .trim();
+
+
+        const username =
+            document
+                .getElementById(
+                    "departmentUsername"
+                )
+                .value
+                .trim();
+
+
+        const password =
+            document
+                .getElementById(
+                    "departmentPassword"
+                )
+                .value;
+
+
+        const message =
+            document.getElementById(
+                "departmentMessage"
+            );
+
+
+
+        // Check empty fields
+
+        if (
+            departmentName === "" ||
+            email === "" ||
+            username === "" ||
+            password === ""
+        ) {
+
+
+            message.textContent =
+                "Please fill all fields.";
+
+
+            return;
+
+        }
+
+
+
+        // Check password length
+
+        if (password.length < 6) {
+
+
+            message.textContent =
+                "Password must be at least 6 characters.";
+
+
+            return;
+
+        }
+
+
+
+        /*
+            FRONTEND FORM READY
+
+            Actual database creation will be
+            connected with the backend later.
+
+            Password is NOT stored in localStorage.
+        */
+
+
+        console.log(
+            "New Department:",
+            {
+                department:
+                    departmentName,
+
+                email:
+                    email,
+
+                username:
+                    username
+            }
+        );
+
+
+
+        message.textContent =
+            "Department details are ready for backend connection.";
+
+
+
+        // Clear form
+
+        document.getElementById(
+            "departmentName"
+        ).value = "";
+
+
+        document.getElementById(
+            "departmentEmail"
+        ).value = "";
+
+
+        document.getElementById(
+            "departmentUsername"
+        ).value = "";
+
+
+        document.getElementById(
+            "departmentPassword"
+        ).value = "";
+
+
+    }
+
+
+
+    // =========================
+    // LOAD ADMIN DASHBOARD
+    // =========================
+
     async function loadAdminDashboard() {
+
 
         try {
 
+
             // Get analytics
+
             const analyticsResponse =
-                await fetch("/analytics");
+                await fetch(
+                    "/analytics"
+                );
+
 
             const analytics =
                 await analyticsResponse.json();
 
 
+
             // Update cards
-            document.getElementById("total").textContent =
+
+            document.getElementById(
+                "total"
+            ).textContent =
                 analytics.total;
 
-            document.getElementById("pending").textContent =
+
+            document.getElementById(
+                "pending"
+            ).textContent =
                 analytics.pending;
 
-            document.getElementById("inProgress").textContent =
+
+            document.getElementById(
+                "inProgress"
+            ).textContent =
                 analytics.in_progress;
 
-            document.getElementById("resolved").textContent =
+
+            document.getElementById(
+                "resolved"
+            ).textContent =
                 analytics.resolved;
 
-            document.getElementById("overdue").textContent =
+
+            document.getElementById(
+                "overdue"
+            ).textContent =
                 analytics.overdue;
 
-            document.getElementById("escalated").textContent =
+
+            document.getElementById(
+                "escalated"
+            ).textContent =
                 analytics.escalated;
 
 
+
             // Get all complaints
+
             const complaintsResponse =
-                await fetch("/complaints");
+                await fetch(
+                    "/complaints"
+                );
+
 
             complaints =
                 await complaintsResponse.json();
 
 
-            displayComplaints(complaints);
+            displayComplaints(
+                complaints
+            );
 
-            createCharts(analytics);
+
+            createCharts(
+                analytics
+            );
 
 
         }
+
+
         catch (error) {
 
-            console.error("Admin dashboard error:", error);
 
-            document.getElementById("complaintsBody").innerHTML = `
+            console.error(
+                "Admin dashboard error:",
+                error
+            );
+
+
+            document.getElementById(
+                "complaintsBody"
+            ).innerHTML = `
+
                 <tr>
+
                     <td colspan="6">
+
                         Could not load complaints.
+
                     </td>
+
                 </tr>
+
             `;
+
 
         }
 
     }
 
 
+
+    // =========================
+    // DISPLAY COMPLAINTS
+    // =========================
+
     function displayComplaints(data) {
 
+
         const tbody =
-            document.getElementById("complaintsBody");
+            document.getElementById(
+                "complaintsBody"
+            );
+
 
         tbody.innerHTML = "";
 
 
+
         if (data.length === 0) {
 
+
             tbody.innerHTML = `
+
                 <tr>
+
                     <td colspan="6">
+
                         No complaints found.
+
                     </td>
+
                 </tr>
+
             `;
 
+
             return;
+
         }
 
 
-        data.forEach(function(complaint) {
 
-            const row =
-                document.createElement("tr");
+        data.forEach(
+            function(complaint) {
 
 
-            let priorityClass =
-                "priority-low";
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
 
-            if (complaint.priority === "Critical") {
-                priorityClass = "priority-critical";
+
+
+                let priorityClass =
+                    "priority-low";
+
+
+                if (
+                    complaint.priority ===
+                    "Critical"
+                ) {
+
+
+                    priorityClass =
+                        "priority-critical";
+
+
+                }
+
+
+                else if (
+                    complaint.priority ===
+                    "High"
+                ) {
+
+
+                    priorityClass =
+                        "priority-high";
+
+
+                }
+
+
+                else if (
+                    complaint.priority ===
+                    "Medium"
+                ) {
+
+
+                    priorityClass =
+                        "priority-medium";
+
+
+                }
+
+
+
+                let statusClass =
+                    "status-pending";
+
+
+                if (
+                    complaint.status ===
+                    "In Progress"
+                ) {
+
+
+                    statusClass =
+                        "status-progress";
+
+
+                }
+
+
+                else if (
+                    complaint.status ===
+                    "Resolved"
+                ) {
+
+
+                    statusClass =
+                        "status-resolved";
+
+
+                }
+
+
+                else if (
+                    complaint.status ===
+                    "Overdue"
+                ) {
+
+
+                    statusClass =
+                        "status-overdue";
+
+
+                }
+
+
+                else if (
+                    complaint.status ===
+                    "Escalated"
+                ) {
+
+
+                    statusClass =
+                        "status-escalated";
+
+
+                }
+
+
+
+                let deadline =
+                    "N/A";
+
+
+                if (
+                    complaint.deadline
+                ) {
+
+
+                    deadline =
+                        new Date(
+                            complaint.deadline
+                        ).toLocaleString();
+
+
+                }
+
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${complaint.student_id}
+                    </td>
+
+
+                    <td>
+                        ${complaint.title}
+                    </td>
+
+
+                    <td>
+                        ${complaint.department}
+                    </td>
+
+
+                    <td>
+
+                        <span
+                            class="${priorityClass}"
+                        >
+
+                            ${complaint.priority}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        <span
+                            class="${statusClass}"
+                        >
+
+                            ${complaint.status}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+                        ${deadline}
+                    </td>
+
+                `;
+
+
+                tbody.appendChild(row);
+
+
             }
-            else if (complaint.priority === "High") {
-                priorityClass = "priority-high";
-            }
-            else if (complaint.priority === "Medium") {
-                priorityClass = "priority-medium";
-            }
+        );
 
-
-            let statusClass =
-                "status-pending";
-
-            if (complaint.status === "In Progress") {
-                statusClass = "status-progress";
-            }
-            else if (complaint.status === "Resolved") {
-                statusClass = "status-resolved";
-            }
-            else if (complaint.status === "Overdue") {
-                statusClass = "status-overdue";
-            }
-            else if (complaint.status === "Escalated") {
-                statusClass = "status-escalated";
-            }
-
-
-            let deadline = "N/A";
-
-            if (complaint.deadline) {
-
-                deadline =
-                    new Date(
-                        complaint.deadline
-                    ).toLocaleString();
-
-            }
-
-
-            row.innerHTML = `
-
-                <td>${complaint.student_id}</td>
-
-                <td>${complaint.title}</td>
-
-                <td>${complaint.department}</td>
-
-                <td>
-                    <span class="${priorityClass}">
-                        ${complaint.priority}
-                    </span>
-                </td>
-
-                <td>
-                    <span class="${statusClass}">
-                        ${complaint.status}
-                    </span>
-                </td>
-
-                <td>${deadline}</td>
-
-            `;
-
-
-            tbody.appendChild(row);
-
-        });
 
     }
 
 
+
+    // =========================
+    // FILTER COMPLAINTS
+    // =========================
+
     function filterComplaints() {
+
 
         const searchInput =
             document
-                .getElementById("searchComplaint")
+                .getElementById(
+                    "searchComplaint"
+                )
                 .value
                 .toLowerCase();
 
 
         const statusFilter =
             document
-                .getElementById("statusFilter")
+                .getElementById(
+                    "statusFilter"
+                )
                 .value;
 
 
         const filtered =
-            complaints.filter(function(complaint) {
+            complaints.filter(
+                function(complaint) {
 
-                const matchesSearch =
 
-                    String(complaint.student_id)
+                    const matchesSearch =
+
+                        String(
+                            complaint.student_id
+                        )
                         .toLowerCase()
-                        .includes(searchInput)
+                        .includes(
+                            searchInput
+                        )
 
-                    ||
+                        ||
 
-                    complaint.title
-                        .toLowerCase()
-                        .includes(searchInput)
+                        complaint.title
+                            .toLowerCase()
+                            .includes(
+                                searchInput
+                            )
 
-                    ||
+                        ||
 
-                    complaint.department
-                        .toLowerCase()
-                        .includes(searchInput);
-
-
-                const matchesStatus =
-                    statusFilter === "All"
-                    ||
-                    complaint.status === statusFilter;
-
-
-                return matchesSearch && matchesStatus;
-
-            });
+                        complaint.department
+                            .toLowerCase()
+                            .includes(
+                                searchInput
+                            );
 
 
-        displayComplaints(filtered);
+
+                    const matchesStatus =
+
+                        statusFilter ===
+                        "All"
+
+                        ||
+
+                        complaint.status ===
+                        statusFilter;
+
+
+
+                    return (
+                        matchesSearch &&
+                        matchesStatus
+                    );
+
+
+                }
+            );
+
+
+        displayComplaints(
+            filtered
+        );
+
 
     }
 
 
+
+    // =========================
+    // CREATE CHARTS
+    // =========================
+
     function createCharts(analytics) {
 
+
         const departmentData =
-            analytics.department_wise || {};
+            analytics.department_wise ||
+            {};
+
 
         const priorityData =
-            analytics.priority_wise || {};
+            analytics.priority_wise ||
+            {};
+
 
 
         const departmentLabels =
-            Object.keys(departmentData);
+            Object.keys(
+                departmentData
+            );
+
 
         const departmentValues =
-            Object.values(departmentData);
+            Object.values(
+                departmentData
+            );
+
 
 
         const priorityLabels =
-            Object.keys(priorityData);
+            Object.keys(
+                priorityData
+            );
+
 
         const priorityValues =
-            Object.values(priorityData);
+            Object.values(
+                priorityData
+            );
+
 
 
         // Department chart
 
         const departmentCtx =
-            document
-                .getElementById("departmentChart");
+            document.getElementById(
+                "departmentChart"
+            );
 
 
         if (departmentChart) {
+
             departmentChart.destroy();
+
         }
 
 
         departmentChart =
-            new Chart(departmentCtx, {
+            new Chart(
+                departmentCtx,
+                {
 
-                type: "bar",
+                    type: "bar",
 
-                data: {
 
-                    labels: departmentLabels,
+                    data: {
 
-                    datasets: [{
+                        labels:
+                            departmentLabels,
 
-                        label: "Complaints",
 
-                        data: departmentValues,
+                        datasets: [
 
-                        borderWidth: 1
 
-                    }]
+                            {
 
-                },
+                                label:
+                                    "Complaints",
 
-                options: {
 
-                    responsive: true,
+                                data:
+                                    departmentValues,
 
-                    scales: {
 
-                        y: {
+                                borderWidth:
+                                    1
 
-                            beginAtZero: true,
-
-                            ticks: {
-                                stepSize: 1
                             }
+
+
+                        ]
+
+                    },
+
+
+                    options: {
+
+                        responsive:
+                            true,
+
+
+                        scales: {
+
+
+                            y: {
+
+
+                                beginAtZero:
+                                    true,
+
+
+                                ticks: {
+
+
+                                    stepSize:
+                                        1
+
+
+                                }
+
+
+                            }
+
 
                         }
 
+
                     }
 
-                }
 
-            });
+                }
+            );
+
 
 
         // Priority chart
 
         const priorityCtx =
-            document
-                .getElementById("priorityChart");
+            document.getElementById(
+                "priorityChart"
+            );
 
 
         if (priorityChart) {
+
             priorityChart.destroy();
+
         }
 
 
         priorityChart =
-            new Chart(priorityCtx, {
+            new Chart(
+                priorityCtx,
+                {
 
-                type: "doughnut",
 
-                data: {
+                    type:
+                        "doughnut",
 
-                    labels: priorityLabels,
 
-                    datasets: [{
+                    data: {
 
-                        label: "Complaints",
 
-                        data: priorityValues,
+                        labels:
+                            priorityLabels,
 
-                        borderWidth: 1
 
-                    }]
+                        datasets: [
 
-                },
 
-                options: {
+                            {
 
-                    responsive: true
+                                label:
+                                    "Complaints",
+
+
+                                data:
+                                    priorityValues,
+
+
+                                borderWidth:
+                                    1
+
+                            }
+
+
+                        ]
+
+                    },
+
+
+                    options: {
+
+
+                        responsive:
+                            true
+
+
+                    }
+
 
                 }
+            );
 
-            });
 
     }
 
 
-    // Load dashboard when page opens
+
+    // =========================
+    // LOAD PAGE
+    // =========================
+
     loadAdminDashboard();
 
+
 </script>
-```
+
 
 </body>
 

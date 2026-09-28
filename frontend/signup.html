@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>InfraMind - Student Sign Up</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <h1>InfraMind</h1>
+
+        <p>College Complaint Management System</p>
+
+        <h2>Student Sign Up</h2>
+
+        <input
+            type="text"
+            id="name"
+            placeholder="Full Name"
+        >
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Email Address"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+        >
+
+        <input
+            type="password"
+            id="confirmPassword"
+            placeholder="Confirm Password"
+        >
+
+        <button onclick="signup()">
+            Create Account
+        </button>
+
+        <p id="signupMessage"></p>
+
+        <p>
+            Already have an account?
+            <a href="index.html">Login</a>
+        </p>
+
+    </div>
+
+
+    <script>
+
+        function signup() {
+
+            const name =
+                document.getElementById("name").value.trim();
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("password").value;
+
+            const confirmPassword =
+                document.getElementById("confirmPassword").value;
+
+
+            if (
+                name === "" ||
+                email === "" ||
+                password === "" ||
+                confirmPassword === ""
+            ) {
+
+                showMessage(
+                    "Please fill all fields."
+                );
+
+                return;
+            }
+
+
+            if (password !== confirmPassword) {
+
+                showMessage(
+                    "Passwords do not match."
+                );
+
+                return;
+            }
+
+
+            if (password.length < 6) {
+
+                showMessage(
+                    "Password must be at least 6 characters."
+                );
+
+                return;
+            }
+
+
+            /*
+                Temporary frontend flow.
+
+                Actual account creation and
+                email OTP will be connected
+                with the backend later.
+            */
+
+            localStorage.setItem(
+                "signupName",
+                name
+            );
+
+            localStorage.setItem(
+                "signupEmail",
+                email
+            );
+
+
+            window.location.href =
+                "verify-otp.html";
+
+        }
+
+
+        function showMessage(message) {
+
+            document.getElementById(
+                "signupMessage"
+            ).textContent = message;
+
+        }
+
+    </script>
+
+</body>
+
+</html>
