@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -14,222 +14,112 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
     <style>
 
-        /* =========================
-           ADD DEPARTMENT TAG
-        ========================= */
-
         .add-department-tag {
-
             display: inline-block;
-
             margin: 25px 0;
-
             padding: 12px 22px;
-
             background: #2563eb;
-
             color: white;
-
             border-radius: 8px;
-
             cursor: pointer;
-
             font-weight: bold;
-
             transition: 0.2s;
-
         }
-
 
         .add-department-tag:hover {
-
             background: #1d4ed8;
-
         }
-
-
-
-        /* =========================
-           DEPARTMENT FORM
-        ========================= */
 
         .department-form {
-
             display: none;
-
             background: white;
-
             padding: 30px;
-
             margin-bottom: 30px;
-
             border-radius: 14px;
-
-            box-shadow:
-                0 4px 18px rgba(0, 0, 0, 0.08);
-
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
             max-width: 500px;
-
         }
-
 
         .department-form h2 {
-
             margin-top: 0;
-
             margin-bottom: 22px;
-
         }
-
 
         .department-form input {
-
             display: block;
-
             width: 100%;
-
             box-sizing: border-box;
-
             padding: 12px 14px;
-
             margin-bottom: 15px;
-
             border: 1px solid #d1d5db;
-
             border-radius: 7px;
-
             font-size: 15px;
-
             outline: none;
-
         }
-
 
         .department-form input:focus {
-
             border-color: #2563eb;
-
         }
-
-
-
-        /* =========================
-           DEPARTMENT FORM BUTTONS
-        ========================= */
 
         .department-form-buttons {
-
             display: flex;
-
             gap: 10px;
-
             margin-top: 5px;
-
         }
-
 
         .department-form-buttons button {
-
             padding: 11px 18px;
-
             border: none;
-
             border-radius: 7px;
-
             cursor: pointer;
-
             font-size: 14px;
-
             font-weight: 600;
-
         }
-
 
         .create-department {
-
             background: #2563eb;
-
             color: white;
-
         }
-
 
         .create-department:hover {
-
             background: #1d4ed8;
-
         }
-
 
         .cancel-department {
-
             background: #e5e7eb;
-
             color: #333;
-
         }
-
 
         .cancel-department:hover {
-
             background: #d1d5db;
-
         }
-
 
         #departmentMessage {
-
             margin-top: 15px;
-
             font-size: 14px;
-
         }
-
-
-
-        /* =========================
-           LOGOUT
-        ========================= */
 
         .admin-logout {
-
             margin-top: 45px;
-
             padding-bottom: 30px;
-
             text-align: center;
-
         }
-
 
         .admin-logout a {
-
             display: inline-block;
-
             padding: 12px 30px;
-
             background: #dc2626;
-
             color: white;
-
             text-decoration: none;
-
             border-radius: 8px;
-
             font-weight: bold;
-
             transition: 0.2s;
-
         }
 
-
         .admin-logout a:hover {
-
             background: #b91c1c;
-
         }
 
     </style>
@@ -239,112 +129,74 @@
 
 <body>
 
-
 <div class="admin-container">
-
-
-    <!-- =========================
-         ADMIN HEADING
-    ========================= -->
 
     <h1>Admin Dashboard</h1>
 
     <p>Complaint Management & Analytics</p>
 
 
-
     <!-- =========================
          ADMIN CARDS
-    ========================= -->
+    ========================== -->
 
     <div class="admin-cards">
 
-
         <div class="admin-card">
-
             <h2 id="total">0</h2>
-
             <p>Total</p>
-
         </div>
 
-
         <div class="admin-card">
-
             <h2 id="pending">0</h2>
-
             <p>Pending</p>
-
         </div>
 
-
         <div class="admin-card">
-
             <h2 id="inProgress">0</h2>
-
             <p>In Progress</p>
-
         </div>
 
-
         <div class="admin-card">
-
             <h2 id="resolved">0</h2>
-
             <p>Resolved</p>
-
         </div>
 
-
         <div class="admin-card">
-
             <h2 id="overdue">0</h2>
-
             <p>Overdue</p>
-
         </div>
-
 
         <div class="admin-card">
-
             <h2 id="escalated">0</h2>
-
             <p>Escalated</p>
-
         </div>
-
 
     </div>
 
 
-
     <!-- =========================
-         ADD DEPARTMENT TAG
-    ========================= -->
+         ADD DEPARTMENT
+    ========================== -->
 
     <div
         onclick="toggleDepartmentForm()"
         class="add-department-tag"
     >
-
         + Add New Department
-
     </div>
-
 
 
     <!-- =========================
          ADD DEPARTMENT FORM
-    ========================= -->
+    ========================== -->
 
     <div
         id="departmentForm"
         class="department-form"
     >
 
-
         <h2>Add New Department</h2>
-
 
         <input
             type="text"
@@ -352,13 +204,11 @@
             placeholder="Department Name"
         >
 
-
         <input
             type="email"
             id="departmentEmail"
             placeholder="Department Email"
         >
-
 
         <input
             type="text"
@@ -366,61 +216,47 @@
             placeholder="Department Username"
         >
 
-
         <input
             type="password"
             id="departmentPassword"
             placeholder="Department Password"
         >
 
-
         <div class="department-form-buttons">
-
 
             <button
                 onclick="addDepartment()"
                 class="create-department"
             >
-
                 Create Department
-
             </button>
-
 
             <button
                 onclick="toggleDepartmentForm()"
                 class="cancel-department"
             >
-
                 Cancel
-
             </button>
-
 
         </div>
 
-
         <p id="departmentMessage"></p>
-
 
     </div>
 
 
-
     <!-- =========================
          SEARCH AND FILTER
-    ========================= -->
+    ========================== -->
 
     <div class="complaint-controls">
-
 
         <input
             type="text"
             id="searchComplaint"
-            placeholder="Search complaints..."
+            placeholder="Search by email, complaint or department..."
             onkeyup="filterComplaints()"
         >
-
 
         <select
             id="statusFilter"
@@ -431,26 +267,21 @@
                 All Status
             </option>
 
-
             <option value="Pending">
                 Pending
             </option>
-
 
             <option value="In Progress">
                 In Progress
             </option>
 
-
             <option value="Resolved">
                 Resolved
             </option>
 
-
             <option value="Overdue">
                 Overdue
             </option>
-
 
             <option value="Escalated">
                 Escalated
@@ -458,30 +289,24 @@
 
         </select>
 
-
     </div>
-
 
 
     <!-- =========================
          COMPLAINTS TABLE
-    ========================= -->
+    ========================== -->
 
     <div class="complaints-table-box">
 
-
         <h2>All Complaints</h2>
-
 
         <table id="complaintsTable">
 
-
             <thead>
-
 
                 <tr>
 
-                    <th>Student ID</th>
+                    <th>Student Email</th>
 
                     <th>Complaint</th>
 
@@ -495,95 +320,67 @@
 
                 </tr>
 
-
             </thead>
 
-
             <tbody id="complaintsBody">
-
 
                 <tr>
 
                     <td colspan="6">
-
                         Loading complaints...
-
                     </td>
 
                 </tr>
 
-
             </tbody>
-
 
         </table>
 
-
     </div>
-
 
 
     <!-- =========================
          DEPARTMENT CHART
-    ========================= -->
+    ========================== -->
 
     <div class="chart-box">
 
-
         <h2>Department-wise Complaints</h2>
 
-
-        <canvas
-            id="departmentChart"
-        ></canvas>
-
+        <canvas id="departmentChart"></canvas>
 
     </div>
-
 
 
     <!-- =========================
          PRIORITY CHART
-    ========================= -->
+    ========================== -->
 
     <div class="chart-box">
 
-
         <h2>Priority-wise Complaints</h2>
 
-
-        <canvas
-            id="priorityChart"
-        ></canvas>
-
+        <canvas id="priorityChart"></canvas>
 
     </div>
-
 
 
     <!-- =========================
          LOGOUT
-    ========================= -->
+    ========================== -->
 
     <div class="admin-logout">
 
-
         <a href="index.html">
-
             Logout
-
         </a>
 
-
     </div>
-
 
 </div>
 
 
-
 <script>
-
 
     // =========================
     // VARIABLES
@@ -596,19 +393,14 @@
     let priorityChart;
 
 
-
     // =========================
     // SHOW / HIDE DEPARTMENT FORM
     // =========================
 
     function toggleDepartmentForm() {
 
-
         const form =
-            document.getElementById(
-                "departmentForm"
-            );
-
+            document.getElementById("departmentForm");
 
         if (
             form.style.display === "none" ||
@@ -617,17 +409,13 @@
 
             form.style.display = "block";
 
-        }
-
-        else {
+        } else {
 
             form.style.display = "none";
 
         }
 
-
     }
-
 
 
     // =========================
@@ -636,50 +424,34 @@
 
     function addDepartment() {
 
-
         const departmentName =
             document
-                .getElementById(
-                    "departmentName"
-                )
+                .getElementById("departmentName")
                 .value
                 .trim();
-
 
         const email =
             document
-                .getElementById(
-                    "departmentEmail"
-                )
+                .getElementById("departmentEmail")
                 .value
                 .trim();
-
 
         const username =
             document
-                .getElementById(
-                    "departmentUsername"
-                )
+                .getElementById("departmentUsername")
                 .value
                 .trim();
 
-
         const password =
             document
-                .getElementById(
-                    "departmentPassword"
-                )
+                .getElementById("departmentPassword")
                 .value;
-
 
         const message =
             document.getElementById(
                 "departmentMessage"
             );
 
-
-
-        // Check empty fields
 
         if (
             departmentName === "" ||
@@ -688,87 +460,55 @@
             password === ""
         ) {
 
-
             message.textContent =
                 "Please fill all fields.";
-
 
             return;
 
         }
 
 
-
-        // Check password length
-
         if (password.length < 6) {
-
 
             message.textContent =
                 "Password must be at least 6 characters.";
 
-
             return;
 
         }
-
-
-
-        /*
-            FRONTEND FORM READY
-
-            Actual database creation will be
-            connected with the backend later.
-
-            Password is NOT stored in localStorage.
-        */
 
 
         console.log(
             "New Department:",
             {
-                department:
-                    departmentName,
-
-                email:
-                    email,
-
-                username:
-                    username
+                department: departmentName,
+                email: email,
+                username: username
             }
         );
-
 
 
         message.textContent =
             "Department details are ready for backend connection.";
 
 
-
-        // Clear form
-
         document.getElementById(
             "departmentName"
         ).value = "";
-
 
         document.getElementById(
             "departmentEmail"
         ).value = "";
 
-
         document.getElementById(
             "departmentUsername"
         ).value = "";
-
 
         document.getElementById(
             "departmentPassword"
         ).value = "";
 
-
     }
-
 
 
     // =========================
@@ -777,68 +517,57 @@
 
     async function loadAdminDashboard() {
 
-
         try {
 
-
-            // Get analytics
-
             const analyticsResponse =
-                await fetch(
-                    "/analytics"
-                );
-
+                await fetch("/analytics");
 
             const analytics =
                 await analyticsResponse.json();
 
 
-
-            // Update cards
-
             document.getElementById(
                 "total"
             ).textContent =
-                analytics.total;
-
+                analytics.total || 0;
 
             document.getElementById(
                 "pending"
             ).textContent =
-                analytics.pending;
-
+                analytics.pending || 0;
 
             document.getElementById(
                 "inProgress"
             ).textContent =
-                analytics.in_progress;
-
+                analytics.in_progress || 0;
 
             document.getElementById(
                 "resolved"
             ).textContent =
-                analytics.resolved;
-
+                analytics.resolved || 0;
 
             document.getElementById(
                 "overdue"
             ).textContent =
-                analytics.overdue;
-
+                analytics.overdue || 0;
 
             document.getElementById(
                 "escalated"
             ).textContent =
-                analytics.escalated;
+                analytics.escalated || 0;
 
-
-
-            // Get all complaints
 
             const complaintsResponse =
-                await fetch(
-                    "/complaints"
+                await fetch("/complaints");
+
+
+            if (!complaintsResponse.ok) {
+
+                throw new Error(
+                    "Could not fetch complaints"
                 );
+
+            }
 
 
             complaints =
@@ -854,12 +583,10 @@
                 analytics
             );
 
-
         }
 
 
         catch (error) {
-
 
             console.error(
                 "Admin dashboard error:",
@@ -874,20 +601,16 @@
                 <tr>
 
                     <td colspan="6">
-
                         Could not load complaints.
-
                     </td>
 
                 </tr>
 
             `;
 
-
         }
 
     }
-
 
 
     // =========================
@@ -895,7 +618,6 @@
     // =========================
 
     function displayComplaints(data) {
-
 
         const tbody =
             document.getElementById(
@@ -906,34 +628,27 @@
         tbody.innerHTML = "";
 
 
-
-        if (data.length === 0) {
-
+        if (!data || data.length === 0) {
 
             tbody.innerHTML = `
 
                 <tr>
 
                     <td colspan="6">
-
                         No complaints found.
-
                     </td>
 
                 </tr>
 
             `;
 
-
             return;
 
         }
 
 
-
         data.forEach(
             function(complaint) {
-
 
                 const row =
                     document.createElement(
@@ -941,6 +656,7 @@
                     );
 
 
+                // Priority class
 
                 let priorityClass =
                     "priority-low";
@@ -951,40 +667,33 @@
                     "Critical"
                 ) {
 
-
                     priorityClass =
                         "priority-critical";
 
-
                 }
-
 
                 else if (
                     complaint.priority ===
                     "High"
                 ) {
 
-
                     priorityClass =
                         "priority-high";
 
-
                 }
-
 
                 else if (
                     complaint.priority ===
                     "Medium"
                 ) {
 
-
                     priorityClass =
                         "priority-medium";
-
 
                 }
 
 
+                // Status class
 
                 let statusClass =
                     "status-pending";
@@ -995,115 +704,114 @@
                     "In Progress"
                 ) {
 
-
                     statusClass =
                         "status-progress";
 
-
                 }
-
 
                 else if (
                     complaint.status ===
                     "Resolved"
                 ) {
 
-
                     statusClass =
                         "status-resolved";
 
-
                 }
-
 
                 else if (
                     complaint.status ===
                     "Overdue"
                 ) {
 
-
                     statusClass =
                         "status-overdue";
 
-
                 }
-
 
                 else if (
                     complaint.status ===
                     "Escalated"
                 ) {
 
-
                     statusClass =
                         "status-escalated";
-
 
                 }
 
 
+                // Deadline
 
-                let deadline =
-                    "N/A";
+                let deadline = "N/A";
 
 
                 if (
                     complaint.deadline
                 ) {
 
-
-                    deadline =
+                    const date =
                         new Date(
                             complaint.deadline
-                        ).toLocaleString();
+                        );
 
+
+                    if (
+                        !isNaN(
+                            date.getTime()
+                        )
+                    ) {
+
+                        deadline =
+                            date.toLocaleString();
+
+                    }
 
                 }
 
+
+                // =========================
+                // STUDENT EMAIL
+                // =========================
+
+                const studentEmail =
+                    complaint.student_email ||
+                    complaint.email ||
+                    "N/A";
 
 
                 row.innerHTML = `
 
                     <td>
-                        ${complaint.student_id}
+                        ${studentEmail}
                     </td>
-
 
                     <td>
-                        ${complaint.title}
+                        ${complaint.title || "N/A"}
                     </td>
-
 
                     <td>
-                        ${complaint.department}
+                        ${complaint.department || "N/A"}
                     </td>
-
 
                     <td>
 
                         <span
                             class="${priorityClass}"
                         >
-
-                            ${complaint.priority}
-
+                            ${complaint.priority || "N/A"}
                         </span>
 
                     </td>
-
 
                     <td>
 
                         <span
                             class="${statusClass}"
                         >
-
-                            ${complaint.status}
-
+                            ${complaint.status || "N/A"}
                         </span>
 
                     </td>
-
 
                     <td>
                         ${deadline}
@@ -1114,13 +822,10 @@
 
                 tbody.appendChild(row);
 
-
             }
         );
 
-
     }
-
 
 
     // =========================
@@ -1129,14 +834,14 @@
 
     function filterComplaints() {
 
-
         const searchInput =
             document
                 .getElementById(
                     "searchComplaint"
                 )
                 .value
-                .toLowerCase();
+                .toLowerCase()
+                .trim();
 
 
         const statusFilter =
@@ -1151,33 +856,44 @@
             complaints.filter(
                 function(complaint) {
 
+                    const email =
+                        String(
+                            complaint.student_email || ""
+                        )
+                        .toLowerCase();
+
+
+                    const title =
+                        String(
+                            complaint.title || ""
+                        )
+                        .toLowerCase();
+
+
+                    const department =
+                        String(
+                            complaint.department || ""
+                        )
+                        .toLowerCase();
+
 
                     const matchesSearch =
 
-                        String(
-                            complaint.student_id
-                        )
-                        .toLowerCase()
-                        .includes(
+                        email.includes(
                             searchInput
                         )
 
                         ||
 
-                        complaint.title
-                            .toLowerCase()
-                            .includes(
-                                searchInput
-                            )
+                        title.includes(
+                            searchInput
+                        )
 
                         ||
 
-                        complaint.department
-                            .toLowerCase()
-                            .includes(
-                                searchInput
-                            );
-
+                        department.includes(
+                            searchInput
+                        );
 
 
                     const matchesStatus =
@@ -1191,12 +907,10 @@
                         statusFilter;
 
 
-
                     return (
                         matchesSearch &&
                         matchesStatus
                     );
-
 
                 }
             );
@@ -1206,9 +920,7 @@
             filtered
         );
 
-
     }
-
 
 
     // =========================
@@ -1216,7 +928,6 @@
     // =========================
 
     function createCharts(analytics) {
-
 
         const departmentData =
             analytics.department_wise ||
@@ -1226,7 +937,6 @@
         const priorityData =
             analytics.priority_wise ||
             {};
-
 
 
         const departmentLabels =
@@ -1241,7 +951,6 @@
             );
 
 
-
         const priorityLabels =
             Object.keys(
                 priorityData
@@ -1254,8 +963,9 @@
             );
 
 
-
-        // Department chart
+        // =========================
+        // DEPARTMENT CHART
+        // =========================
 
         const departmentCtx =
             document.getElementById(
@@ -1277,78 +987,62 @@
 
                     type: "bar",
 
-
                     data: {
 
                         labels:
                             departmentLabels,
 
-
                         datasets: [
-
 
                             {
 
                                 label:
                                     "Complaints",
 
-
                                 data:
                                     departmentValues,
-
 
                                 borderWidth:
                                     1
 
                             }
 
-
                         ]
 
                     },
-
 
                     options: {
 
                         responsive:
                             true,
 
-
                         scales: {
 
-
                             y: {
-
 
                                 beginAtZero:
                                     true,
 
-
                                 ticks: {
-
 
                                     stepSize:
                                         1
 
-
                                 }
-
 
                             }
 
-
                         }
 
-
                     }
-
 
                 }
             );
 
 
-
-        // Priority chart
+        // =========================
+        // PRIORITY CHART
+        // =========================
 
         const priorityCtx =
             document.getElementById(
@@ -1368,58 +1062,44 @@
                 priorityCtx,
                 {
 
-
                     type:
                         "doughnut",
 
-
                     data: {
-
 
                         labels:
                             priorityLabels,
 
-
                         datasets: [
-
 
                             {
 
                                 label:
                                     "Complaints",
 
-
                                 data:
                                     priorityValues,
-
 
                                 borderWidth:
                                     1
 
                             }
 
-
                         ]
 
                     },
 
-
                     options: {
-
 
                         responsive:
                             true
 
-
                     }
-
 
                 }
             );
 
-
     }
-
 
 
     // =========================
@@ -1428,10 +1108,9 @@
 
     loadAdminDashboard();
 
-
 </script>
-
 
 </body>
 
 </html>
+
