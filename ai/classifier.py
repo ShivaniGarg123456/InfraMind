@@ -313,7 +313,7 @@ def classify_complaint(complaint):
     # MEDIUM - FAN / AC
     # ========================================================
 
-   if any(keyword in text for keyword in [
+  if any(keyword in text for keyword in [
     "fan",
     "air conditioner",
     "air conditioning"
