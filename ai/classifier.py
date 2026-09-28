@@ -5,30 +5,25 @@ Member 3: Shashi
 Hybrid Complaint Classification:
 1. Rule-based classification for common complaints
 2. Gemini AI fallback for unknown complaints
-
-AI Output:
-    category
-    department
-    priority
-
-Priority:
-    Critical, High, Medium, Low
 """
 
 import os
 import json
+import re
+
 from dotenv import load_dotenv
 from google import genai
 
 
-# Load .env from InfraMind root folder
+# ============================================================
+# ENVIRONMENT / GEMINI SETUP
+# ============================================================
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENV_PATH = os.path.join(BASE_DIR, ".env")
 
 load_dotenv(ENV_PATH)
 
-
-# Gemini client
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 client = None
@@ -38,17 +33,41 @@ if GEMINI_API_KEY:
 
 
 # ============================================================
+# KEYWORD MATCHING HELPERS
+# ============================================================
+
+def contains_keyword(text, keyword):
+    """
+    Match a complete word or phrase.
+
+    This prevents:
+        "ac" from matching "machine"
+    """
+
+    pattern = r"\b" + re.escape(keyword.lower()) + r"\b"
+
+    return re.search(pattern, text.lower()) is not None
+
+
+def contains_any_keyword(text, keywords):
+    """Return True if any keyword matches."""
+
+    return any(
+        contains_keyword(text, keyword)
+        for keyword in keywords
+    )
+
+
+# ============================================================
 # GEMINI FALLBACK
 # ============================================================
 
 def classify_with_gemini(complaint):
-    """
-    Use Gemini only when rule-based classification
-    cannot identify the complaint.
-    """
 
     if client is None:
+
         print("Gemini API key not found. Using safe default.")
+
         return {
             "category": "Other",
             "department": "Admin",
@@ -74,12 +93,14 @@ The JSON must contain exactly these three keys:
 }}
 
 Allowed priority values:
+
 - Critical
 - High
 - Medium
 - Low
 
 Possible departments:
+
 - IT
 - Maintenance
 - Electrical
@@ -90,39 +111,80 @@ Possible departments:
 - Library
 - Transport
 
-Choose a short and meaningful category based on the complaint.
+Choose a short and meaningful category.
 
 Priority rules:
-- Critical: immediate danger such as fire, smoke, gas leak,
-  electric shock, flooding, major electrical hazard
-- High: serious issues affecting computers, servers, network,
-  WiFi, security, exams or major academic operations
-- Medium: normal issues such as fan, AC, light, projector,
-  water, hostel or academic problems
-- Low: minor issues such as cleaning, dustbin, chair, desk,
-  furniture or similar non-urgent problems
 
-Do not add explanations.
+Critical:
+- fire
+- smoke
+- gas leak
+- electric shock
+- flooding
+- major electrical danger
+
+High:
+- computers
+- servers
+- network
+- WiFi
+- security
+- exams
+- major academic operations
+
+Medium:
+- fan
+- AC
+- light
+- projector
+- water
+- hostel
+- transport
+- normal academic problems
+
+Low:
+- cleaning
+- dustbin
+- chair
+- desk
+- furniture
+- other minor non-urgent problems
+
+Do not classify something as Projector just because the word
+"display" appears.
+
+For example:
+"campus bus tracking display is incorrect"
+should be related to Transport.
+
 Return JSON only.
 """
 
     try:
+
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             contents=prompt
         )
 
         response_text = response.text.strip()
 
-        # Remove markdown code fences if Gemini adds them
         if response_text.startswith("```"):
-            response_text = response_text.replace("```json", "")
-            response_text = response_text.replace("```", "")
+
+            response_text = response_text.replace(
+                "```json",
+                ""
+            )
+
+            response_text = response_text.replace(
+                "```",
+                ""
+            )
+
             response_text = response_text.strip()
 
         result = json.loads(response_text)
 
-        # Make sure required keys exist
         category = result.get("category")
         department = result.get("department")
         priority = result.get("priority")
@@ -162,9 +224,14 @@ Return JSON only.
         }
 
     except Exception as error:
+
         print("Gemini classification failed:", error)
 
-        # Safe fallback
+        print(
+            "Gemini is temporarily unavailable. "
+            "Using safe default classification."
+        )
+
         return {
             "category": "Other",
             "department": "Admin",
@@ -177,14 +244,9 @@ Return JSON only.
 # ============================================================
 
 def classify_complaint(complaint):
-    """
-    Hybrid complaint classifier.
-
-    First tries rule-based classification.
-    If no rule matches, uses Gemini.
-    """
 
     if not complaint:
+
         return {
             "category": "Other",
             "department": "Admin",
@@ -193,278 +255,408 @@ def classify_complaint(complaint):
 
     text = complaint.lower().strip()
 
+
     # ========================================================
-    # CRITICAL
+    # CRITICAL - SAFETY
     # ========================================================
 
-    critical_keywords = [
-        "fire",
-        "smoke",
-        "sparking",
-        "electric shock",
-        "gas leak",
-        "gas leakage",
-        "flood",
-        "flooding"
-    ]
+    if contains_any_keyword(
+        text,
+        [
+            "fire",
+            "smoke",
+            "sparking",
+            "electric shock",
+            "gas leak",
+            "gas leakage",
+            "flood",
+            "flooding"
+        ]
+    ):
 
-    if any(keyword in text for keyword in critical_keywords):
+        if contains_any_keyword(
+            text,
+            ["gas leak", "gas leakage"]
+        ):
 
-        if "gas leak" in text or "gas leakage" in text:
             return {
                 "category": "Gas Leak",
                 "department": "Maintenance",
                 "priority": "Critical"
             }
 
-        elif "flood" in text or "flooding" in text:
+        if contains_any_keyword(
+            text,
+            ["flood", "flooding"]
+        ):
+
             return {
                 "category": "Water/Flood",
                 "department": "Maintenance",
                 "priority": "Critical"
             }
 
-        elif "fire" in text or "smoke" in text:
+        if contains_any_keyword(
+            text,
+            ["fire", "smoke"]
+        ):
+
             return {
                 "category": "Fire/Safety",
                 "department": "Security",
                 "priority": "Critical"
             }
 
-        else:
-            return {
-                "category": "Electrical Hazard",
-                "department": "Electrical",
-                "priority": "Critical"
-            }
+        return {
+            "category": "Electrical Hazard",
+            "department": "Electrical",
+            "priority": "Critical"
+        }
+
 
     # ========================================================
     # HIGH - IT / LAB
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "computer",
-        "computers",
-        "pc",
-        "desktop",
-        "laptop",
-        "server"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "computer",
+            "computers",
+            "pc",
+            "desktop",
+            "laptop",
+            "server",
+            "servers"
+        ]
+    ):
+
         return {
             "category": "Lab",
             "department": "IT",
             "priority": "High"
         }
 
+
     # ========================================================
     # HIGH - NETWORK
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "wifi",
-        "wi-fi",
-        "internet",
-        "network",
-        "router",
-        "connection"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "wifi",
+            "wi-fi",
+            "internet",
+            "network",
+            "router",
+            "connection"
+        ]
+    ):
+
         return {
             "category": "Network",
             "department": "IT",
             "priority": "High"
         }
 
+
     # ========================================================
     # HIGH - SECURITY
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "security",
-        "security guard",
-        "theft",
-        "stolen",
-        "cctv",
-        "camera"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "security",
+            "security guard",
+            "theft",
+            "stolen",
+            "cctv",
+            "camera"
+        ]
+    ):
+
         return {
             "category": "Security",
             "department": "Security",
             "priority": "High"
         }
 
+
     # ========================================================
     # HIGH - EXAM
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "exam",
-        "examination",
-        "question paper",
-        "admit card",
-        "hall ticket"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "exam",
+            "examination",
+            "question paper",
+            "admit card",
+            "hall ticket"
+        ]
+    ):
+
         return {
             "category": "Exam",
             "department": "Academic",
             "priority": "High"
         }
 
+
     # ========================================================
     # MEDIUM - FAN / AC
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "fan",
-        "air conditioner",
-        "air conditioning",
-        "ac"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "fan",
+            "air conditioner",
+            "air conditioning",
+            "ac"
+        ]
+    ):
+
         return {
             "category": "Cooling",
             "department": "Electrical",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - LIGHT / ELECTRICITY
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "light",
-        "bulb",
-        "electricity",
-        "switch",
-        "power"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "light",
+            "bulb",
+            "electricity",
+            "switch",
+            "power"
+        ]
+    ):
+
         return {
             "category": "Electrical",
             "department": "Electrical",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - PROJECTOR
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "projector",
-        "display"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "projector",
+            "projector screen",
+            "classroom projector"
+        ]
+    ):
+
         return {
             "category": "Projector",
             "department": "IT",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - WATER
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "water",
-        "tap",
-        "drinking water",
-        "water cooler"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "water",
+            "tap",
+            "drinking water",
+            "water cooler"
+        ]
+    ):
+
         return {
             "category": "Water",
             "department": "Maintenance",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - HOSTEL
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "hostel room",
-        "hostel"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "hostel room",
+            "hostel"
+        ]
+    ):
+
         return {
             "category": "Hostel",
             "department": "Hostel",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # LOW - CLEANING
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "cleaning",
-        "dirty",
-        "dust",
-        "dustbin",
-        "garbage"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "cleaning",
+            "dirty",
+            "dust",
+            "dustbin",
+            "garbage"
+        ]
+    ):
+
         return {
             "category": "Cleaning",
             "department": "Maintenance",
             "priority": "Low"
         }
 
+
     # ========================================================
     # LOW - FURNITURE
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "chair",
-        "desk",
-        "table",
-        "bench",
-        "furniture"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "chair",
+            "desk",
+            "table",
+            "bench",
+            "furniture"
+        ]
+    ):
+
         return {
             "category": "Furniture",
             "department": "Maintenance",
             "priority": "Low"
         }
 
+
+    # ========================================================
+    # MEDIUM - BIOMETRIC / ATTENDANCE
+    # ========================================================
+
+    if contains_any_keyword(
+        text,
+        [
+            "biometric",
+            "fingerprint scanner",
+            "fingerprint",
+            "attendance machine",
+            "attendance scanner"
+        ]
+    ):
+
+        return {
+            "category": "Attendance",
+            "department": "Academic",
+            "priority": "Medium"
+        }
+
+
     # ========================================================
     # MEDIUM - ACADEMIC
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "teacher",
-        "faculty",
-        "class",
-        "lecture",
-        "attendance",
-        "assignment",
-        "subject"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "teacher",
+            "faculty",
+            "class",
+            "lecture",
+            "attendance",
+            "assignment",
+            "subject"
+        ]
+    ):
+
         return {
             "category": "Academic",
             "department": "Academic",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - ADMINISTRATIVE
     # ========================================================
 
-    if any(keyword in text for keyword in [
-        "fee",
-        "fees",
-        "scholarship",
-        "document",
-        "certificate",
-        "id card",
-        "registration",
-        "administration",
-        "admin"
-    ]):
+    if contains_any_keyword(
+        text,
+        [
+            "fee",
+            "fees",
+            "scholarship",
+            "document",
+            "certificate",
+            "id card",
+            "registration",
+            "administration",
+            "admin"
+        ]
+    ):
+
         return {
             "category": "Administrative",
             "department": "Admin",
             "priority": "Medium"
         }
 
+
+    # ========================================================
+    # MEDIUM - TRANSPORT
+    # ========================================================
+
+    if contains_any_keyword(
+        text,
+        [
+            "bus",
+            "campus bus",
+            "transport",
+            "shuttle",
+            "bus pass",
+            "parking",
+            "parking pass",
+            "vehicle"
+        ]
+    ):
+
+        return {
+            "category": "Transport",
+            "department": "Transport",
+            "priority": "Medium"
+        }
+
+
     # ========================================================
     # GEMINI FALLBACK
     # ========================================================
 
-    print("No rule matched. Sending complaint to Gemini...")
+    print(
+        "No rule matched. Sending complaint to Gemini..."
+    )
 
     return classify_with_gemini(complaint)
 
@@ -477,25 +669,44 @@ if __name__ == "__main__":
 
     test_complaints = [
 
-        # Rule-based examples
         "Five computers in the CSE lab are not working",
+
         "The college WiFi is not working",
+
         "There is a fire in the hostel",
 
-        # Gemini fallback examples
+        "The classroom AC is not working",
+
+        "The classroom fan is broken",
+
+        "The classroom is very dirty",
+
         "The biometric machine keeps rejecting my attendance",
-        "The drinking water machine makes a strange noise",
-        "My campus parking pass is not being accepted"
+
+        "My parking pass is not being accepted at the campus gate",
+
+        "The campus bus tracking display is showing incorrect information",
+
+        "The biometric scanner refuses to recognize my fingerprint",
+
+        "The library book return machine is not accepting books"
     ]
 
-    print("\n========== InfraMind AI Complaint Classifier ==========\n")
+    print(
+        "\n========== InfraMind AI Complaint Classifier ==========\n"
+    )
 
-    for number, complaint in enumerate(test_complaints, start=1):
+    for number, complaint in enumerate(
+        test_complaints,
+        start=1
+    ):
 
         print(f"Test {number}")
+
         print(f"Complaint: {complaint}")
 
         result = classify_complaint(complaint)
 
         print(f"AI Output: {result}")
+
         print("-" * 60)
