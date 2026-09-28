@@ -98,6 +98,85 @@ def login():
         "student_id": user["student_id"],
         "department": user["department"]
     })
+# STUDENT SIGNUP
+@app.route("/signup", methods=["POST"])
+def signup():
+
+    data = request.get_json()
+
+    username = data.get("username")
+    password = data.get("password")
+    student_id = data.get("student_id")
+
+    if not username or not password or not student_id:
+        return jsonify({
+            "error": "Username, password and student ID are required"
+        }), 400
+
+    import hashlib
+
+    password_hash = hashlib.sha256(
+        password.encode()
+    ).hexdigest()
+
+    conn = get_db()
+
+    # Check if username already exists
+    existing_user = conn.execute(
+        """
+        SELECT id
+        FROM users
+        WHERE username = ?
+        """,
+        (username,)
+    ).fetchone()
+
+    if existing_user:
+        conn.close()
+
+        return jsonify({
+            "error": "Username already exists"
+        }), 409
+
+    # Check if student ID already exists
+    existing_student = conn.execute(
+        """
+        SELECT id
+        FROM users
+        WHERE student_id = ?
+        """,
+        (student_id,)
+    ).fetchone()
+
+    if existing_student:
+        conn.close()
+
+        return jsonify({
+            "error": "Student ID already registered"
+        }), 409
+
+    # Create student account
+    conn.execute(
+        """
+        INSERT INTO users
+        (username, password, role, student_id, department)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            username,
+            password_hash,
+            "student",
+            student_id,
+            None
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "message": "Student account created successfully"
+    }), 201
 
 # CREATE COMPLAINT
 @app.route("/complaints", methods=["POST"])
