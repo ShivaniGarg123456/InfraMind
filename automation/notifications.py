@@ -280,5 +280,5 @@ def notify_resolved(student_email: str, complaint: dict):
         ],
         complaint,
         banner_color="#15803d",
-        closing_line="Thank you for helping us make the campus better.",
+        closing_line="Thank you for helping us to make the campus better.",
     )
