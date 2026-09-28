@@ -1,3 +1,4 @@
+`
 <!DOCTYPE html>
 <html lang="en">
 
@@ -47,7 +48,7 @@
         >
 
         <button onclick="signup()">
-            Create Account
+            Send OTP
         </button>
 
         <p id="signupMessage"></p>
@@ -62,7 +63,7 @@
 
     <script>
 
-        function signup() {
+        async function signup() {
 
             const name =
                 document.getElementById("name").value.trim();
@@ -112,27 +113,84 @@
             }
 
 
-            /*
-                Temporary frontend flow.
-
-                Actual account creation and
-                email OTP will be connected
-                with the backend later.
-            */
-
-            localStorage.setItem(
-                "signupName",
-                name
-            );
-
-            localStorage.setItem(
-                "signupEmail",
-                email
-            );
+            showMessage("Sending OTP...");
 
 
-            window.location.href =
-                "verify-otp.html";
+            try {
+
+                const response = await fetch(
+                    "/send-otp",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email: email
+                        })
+                    }
+                );
+
+
+                const data = await response.json();
+
+
+                if (!response.ok) {
+
+                    showMessage(
+                        data.error || "Failed to send OTP."
+                    );
+
+                    return;
+                }
+
+
+                // Store signup details temporarily
+                localStorage.setItem(
+                    "signupName",
+                    name
+                );
+
+                localStorage.setItem(
+                    "signupEmail",
+                    email
+                );
+
+                localStorage.setItem(
+                    "signupPassword",
+                    password
+                );
+
+
+                showMessage(
+                    "OTP sent successfully! Check your email."
+                );
+
+
+                setTimeout(function () {
+
+                    window.location.href =
+                        "verify-otp.html";
+
+                }, 1000);
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "OTP error:",
+                    error
+                );
+
+                showMessage(
+                    "Could not connect to the server."
+                );
+
+            }
 
         }
 
@@ -150,3 +208,4 @@
 </body>
 
 </html>
+

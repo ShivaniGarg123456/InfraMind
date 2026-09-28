@@ -4,6 +4,8 @@ import sqlite3
 from datetime import datetime
 import sys
 import os
+import random
+from automation.notifications import send_notification
 
 # Allow Python to access the project folders
 sys.path.insert(
@@ -17,7 +19,7 @@ from ai.classifier import classify_complaint
 from automation.deadline import calculate_deadline
 from automation.scheduler import start_scheduler
 from automation.analytics import get_analytics_summary
-from automation.notifications import notify_new_complaint
+from automation.notifications import notify_new_complaint, send_notification
 
 
 DEPARTMENT_EMAILS = {
@@ -33,6 +35,7 @@ DEPARTMENT_EMAILS = {
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
 app.secret_key = "inframind-demo-secret-key"
+otp_store = {}
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -46,6 +49,47 @@ def get_db():
 @app.route("/")
 def home():
     return app.send_static_file("index.html")
+@app.route("/send-otp", methods=["POST"])
+def send_otp():
+
+    data = request.get_json()
+
+    email = data.get("email")
+
+    if not email:
+        return jsonify({
+            "error": "Email is required"
+        }), 400
+
+    # Generate 6-digit OTP
+    otp = str(random.randint(100000, 999999))
+
+    # Store OTP temporarily
+    otp_store[email] = otp
+
+    # Send OTP using existing Gmail system
+    send_notification(
+        email,
+        "InfraMind - Email Verification OTP",
+        f"""
+Dear Student,
+
+Your InfraMind email verification OTP is:
+
+{otp}
+
+This OTP is required to verify your email address.
+
+Please do not share this OTP with anyone.
+
+Regards,
+Team InfraMind
+"""
+    )
+
+    return jsonify({
+        "message": "OTP sent successfully"
+    })
 # LOGIN
 @app.route("/login", methods=["POST"])
 def login():
@@ -105,23 +149,33 @@ def signup():
     data = request.get_json()
 
     username = data.get("username")
+    email = data.get("email")
     password = data.get("password")
-    student_id = data.get("student_id")
 
-    if not username or not password or not student_id:
+    if not username or not email or not password:
         return jsonify({
-            "error": "Username, password and student ID are required"
+            "error": "Username, email and password are required"
         }), 400
 
     import hashlib
+    import random
+    from datetime import datetime, timedelta
 
     password_hash = hashlib.sha256(
         password.encode()
     ).hexdigest()
 
+    # Generate 6-digit OTP
+    otp = str(random.randint(100000, 999999))
+
+    # OTP valid for 10 minutes
+    otp_expiry = (
+        datetime.now() + timedelta(minutes=10)
+    ).isoformat()
+
     conn = get_db()
 
-    # Check if username already exists
+    # Check username
     existing_user = conn.execute(
         """
         SELECT id
@@ -138,35 +192,40 @@ def signup():
             "error": "Username already exists"
         }), 409
 
-    # Check if student ID already exists
-    existing_student = conn.execute(
+    # Check email
+    existing_email = conn.execute(
         """
         SELECT id
         FROM users
-        WHERE student_id = ?
+        WHERE email = ?
         """,
-        (student_id,)
+        (email,)
     ).fetchone()
 
-    if existing_student:
+    if existing_email:
         conn.close()
 
         return jsonify({
-            "error": "Student ID already registered"
+            "error": "Email already registered"
         }), 409
 
     # Create student account
     conn.execute(
         """
         INSERT INTO users
-        (username, password, role, student_id, department)
-        VALUES (?, ?, ?, ?, ?)
+        (username, email, password, email_verified,
+         otp, otp_expiry, role, student_id, department)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             username,
+            email,
             password_hash,
+            0,
+            otp,
+            otp_expiry,
             "student",
-            student_id,
+            None,
             None
         )
     )
@@ -174,8 +233,11 @@ def signup():
     conn.commit()
     conn.close()
 
+    print("OTP for", email, ":", otp)
+
     return jsonify({
-        "message": "Student account created successfully"
+        "message": "OTP sent to your email",
+        "email": email
     }), 201
 
 # CREATE COMPLAINT
