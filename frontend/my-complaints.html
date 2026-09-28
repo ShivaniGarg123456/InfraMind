@@ -40,7 +40,7 @@
 
         try {
 
-            const response = await fetch("/complaints");
+          const response = await fetch("/my-complaints");
 
             if (!response.ok) {
                 throw new Error("Failed to fetch complaints");
@@ -132,7 +132,7 @@
     loadComplaints();
 
 </script>
-```
+
 
 </body>
 </html>

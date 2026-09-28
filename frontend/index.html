@@ -1,14 +1,15 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>InfraMind - Login</title>
 
     <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
@@ -19,63 +20,144 @@
 
         <p>College Complaint Management System</p>
 
-
-        <!-- Student Login -->
-
-        <h2>Student Login</h2>
-
-        <input
-            type="number"
-            id="studentId"
-            placeholder="Student ID"
-        >
-
-        <input
-            type="password"
-            id="studentPassword"
-            placeholder="Password"
-        >
-
-        <button onclick="studentLogin()">
-            Student Login
-        </button>
-
-
-        <!-- Admin Login -->
-
-        <h2>Admin Login</h2>
+        <h2>Login</h2>
 
         <input
             type="text"
-            id="adminUsername"
-            placeholder="Admin Username"
+            id="username"
+            placeholder="Student ID / Username"
         >
 
         <input
             type="password"
-            id="adminPassword"
+            id="password"
             placeholder="Password"
         >
 
-        <button onclick="adminLogin()">
-            Admin Login
+        <button onclick="loginUser()">
+            Login
         </button>
+
+        <p id="loginMessage"></p>
 
     </div>
 
 
     <script>
 
-        function studentLogin() {
+        async function loginUser() {
 
-            window.location.href = "dashboard.html";
+            const username =
+                document.getElementById("username").value.trim();
+
+            const password =
+                document.getElementById("password").value;
+
+            if (username === "" || password === "") {
+
+                showMessage(
+                    "Please enter username and password."
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch("/login", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+
+                });
+
+
+                const data = await response.json();
+
+
+                if (!response.ok) {
+
+                    showMessage(
+                        data.error ||
+                        "Invalid username or password."
+                    );
+
+                    return;
+                }
+
+
+                // Save role
+                localStorage.setItem(
+                    "userRole",
+                    data.role
+                );
+
+
+                // Student
+                if (data.role === "student") {
+
+                    localStorage.setItem(
+                        "studentId",
+                        data.student_id
+                    );
+
+                    window.location.href =
+                        "dashboard.html";
+                }
+
+
+                // Admin
+                else if (data.role === "admin") {
+
+                    window.location.href =
+                        "admin.html";
+                }
+
+
+                // Department
+                else if (data.role === "department") {
+
+                    localStorage.setItem(
+                        "department",
+                        data.department
+                    );
+
+                    window.location.href =
+                        "department.html";
+                }
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "Login error:",
+                    error
+                );
+
+                showMessage(
+                    "Could not connect to the server."
+                );
+            }
 
         }
 
 
-        function adminLogin() {
+        function showMessage(message) {
 
-            window.location.href = "admin.html";
+            document.getElementById(
+                "loginMessage"
+            ).textContent = message;
 
         }
 
@@ -84,4 +166,3 @@
 </body>
 
 </html>
-```

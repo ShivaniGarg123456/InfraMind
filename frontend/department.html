@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -38,8 +38,7 @@
     async function loadComplaints() {
 
         try {
-
-            const response = await fetch("/complaints");
+const response = await fetch("/department-complaints");
 
             if (!response.ok) {
                 throw new Error("Failed to load complaints");
@@ -313,4 +312,4 @@
 
 </body>
 </html>
-```
+

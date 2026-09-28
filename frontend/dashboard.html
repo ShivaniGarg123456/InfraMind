@@ -10,7 +10,7 @@
 
 <body>
 
-```
+
 <div class="dashboard">
 
     <h1>Welcome to InfraMind</h1>
@@ -58,42 +58,42 @@
 
 <script>
 
-    async function loadDashboard() {
+async function loadDashboard() {
 
-        try {
+    try {
 
-            const response = await fetch("/analytics");
+        const response = await fetch("/my-complaints");
 
-            if (!response.ok) {
-                throw new Error("Failed to load analytics");
-            }
-
-            const data = await response.json();
-
-            document.getElementById("totalComplaints").textContent =
-                data.total;
-
-            document.getElementById("pendingComplaints").textContent =
-                data.pending;
-
-            document.getElementById("inProgressComplaints").textContent =
-                data.in_progress;
-
-            document.getElementById("resolvedComplaints").textContent =
-                data.resolved;
-
+        if (!response.ok) {
+            throw new Error("Failed to load complaints");
         }
-        catch (error) {
 
-            console.error("Dashboard error:", error);
+        const complaints = await response.json();
 
-        }
+        document.getElementById("totalComplaints").textContent =
+            complaints.length;
+
+        document.getElementById("pendingComplaints").textContent =
+            complaints.filter(c => c.status === "Pending").length;
+
+        document.getElementById("inProgressComplaints").textContent =
+            complaints.filter(c => c.status === "In Progress").length;
+
+        document.getElementById("resolvedComplaints").textContent =
+            complaints.filter(c => c.status === "Resolved").length;
+
     }
+    catch (error) {
 
-    loadDashboard();
+        console.error("Dashboard error:", error);
+
+    }
+}
+
+loadDashboard();
 
 </script>
-```
+
 
 </body>
 </html>

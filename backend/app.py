@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 import sqlite3
 from datetime import datetime
@@ -32,6 +32,7 @@ DEPARTMENT_EMAILS = {
 
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
+app.secret_key = "inframind-demo-secret-key"
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -45,6 +46,58 @@ def get_db():
 @app.route("/")
 def home():
     return app.send_static_file("index.html")
+# LOGIN
+@app.route("/login", methods=["POST"])
+def login():
+
+    data = request.get_json()
+
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return jsonify({
+            "error": "Username and password are required"
+        }), 400
+
+    import hashlib
+
+    password_hash = hashlib.sha256(
+        password.encode()
+    ).hexdigest()
+
+    conn = get_db()
+
+    user = conn.execute(
+        """
+        SELECT *
+        FROM users
+        WHERE username = ?
+        AND password = ?
+        """,
+        (username, password_hash)
+    ).fetchone()
+
+    conn.close()
+
+    if user is None:
+        return jsonify({
+            "error": "Invalid username or password"
+        }), 401
+
+    # Create login session
+    session["user_id"] = user["id"]
+    session["username"] = user["username"]
+    session["role"] = user["role"]
+    session["student_id"] = user["student_id"]
+    session["department"] = user["department"]
+
+    return jsonify({
+        "message": "Login successful",
+        "role": user["role"],
+        "student_id": user["student_id"],
+        "department": user["department"]
+    })
 
 # CREATE COMPLAINT
 @app.route("/complaints", methods=["POST"])
@@ -132,14 +185,145 @@ def create_complaint():
         "status": status,
         "deadline": deadline
     }), 201
+# STUDENT ANALYTICS
+@app.route("/student-analytics", methods=["GET"])
+def student_analytics():
 
+    if "user_id" not in session:
+        return jsonify({"error": "Please login first"}), 401
+
+    if session.get("role") != "student":
+        return jsonify({"error": "Access denied"}), 403
+
+    student_id = session.get("student_id")
+
+    conn = get_db()
+
+    complaints = conn.execute(
+        """
+        SELECT status
+        FROM complaints
+        WHERE student_id = ?
+        """,
+        (student_id,)
+    ).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "total": len(complaints),
+        "pending": sum(1 for c in complaints if c["status"] == "Pending"),
+        "in_progress": sum(1 for c in complaints if c["status"] == "In Progress"),
+        "resolved": sum(1 for c in complaints if c["status"] == "Resolved")
+    })
 
 # ANALYTICS
 @app.route("/analytics", methods=["GET"])
 def analytics():
+    print("SESSION:", dict(session))
+
+    if "user_id" not in session:
+        return jsonify({"error": "Please login first"}), 401
+
+    # Student → only their complaints
+    if session.get("role") == "student":
+
+        student_id = session.get("student_id")
+
+        conn = get_db()
+
+        complaints = conn.execute(
+            """
+            SELECT status
+            FROM complaints
+            WHERE student_id = ?
+            """,
+            (student_id,)
+        ).fetchall()
+
+        conn.close()
+
+        total = len(complaints)
+        pending = sum(1 for c in complaints if c["status"] == "Pending")
+        in_progress = sum(1 for c in complaints if c["status"] == "In Progress")
+        resolved = sum(1 for c in complaints if c["status"] == "Resolved")
+
+        return jsonify({
+            "total": total,
+            "pending": pending,
+            "in_progress": in_progress,
+            "resolved": resolved
+        })
+
+    # Admin → all complaints
     return jsonify(get_analytics_summary())
+# GET LOGGED-IN STUDENT'S COMPLAINTS
+@app.route("/my-complaints", methods=["GET"])
+def get_my_complaints():
 
+    # Check if user is logged in
+    if "user_id" not in session:
+        return jsonify({
+            "error": "Please login first"
+        }), 401
 
+    # Only students can access this
+    if session.get("role") != "student":
+        return jsonify({
+            "error": "Access denied"
+        }), 403
+
+    student_id = session.get("student_id")
+
+    conn = get_db()
+
+    complaints = conn.execute(
+        """
+        SELECT *
+        FROM complaints
+        WHERE student_id = ?
+        ORDER BY id DESC
+        """,
+        (student_id,)
+    ).fetchall()
+
+    conn.close()
+
+    return jsonify([dict(row) for row in complaints])
+# GET DEPARTMENT COMPLAINTS
+@app.route("/department-complaints", methods=["GET"])
+def get_department_complaints():
+
+    if "user_id" not in session:
+        return jsonify({
+            "error": "Please login first"
+        }), 401
+
+    if session.get("role") != "department":
+        return jsonify({
+            "error": "Access denied"
+        }), 403
+
+    department = session.get("department")
+
+    conn = get_db()
+
+    complaints = conn.execute(
+        """
+        SELECT *
+        FROM complaints
+        WHERE department = ?
+        ORDER BY id DESC
+        """,
+        (department,)
+    ).fetchall()
+
+    conn.close()
+
+    return jsonify([
+        dict(row)
+        for row in complaints
+    ])
 # GET ALL COMPLAINTS
 @app.route("/complaints", methods=["GET"])
 def get_complaints():
