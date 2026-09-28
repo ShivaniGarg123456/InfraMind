@@ -5,9 +5,8 @@ from datetime import datetime
 import sys
 import os
 import random
-from automation.notifications import send_notification
 
-# Allow Python to access the project folders
+# Allow Python to access the project folders (must be BEFORE project imports)
 sys.path.insert(
     0,
     os.path.abspath(
@@ -19,18 +18,26 @@ from ai.classifier import classify_complaint
 from automation.deadline import calculate_deadline
 from automation.scheduler import start_scheduler
 from automation.analytics import get_analytics_summary
-from automation.notifications import notify_new_complaint, send_notification
+from automation.notifications import (
+    send_notification,
+    notify_new_complaint,
+    notify_complaint_registered,
+    notify_status_change,
+    notify_resolved,
+)
 
 
+# Fallback emails (used only if department has no email in the users table)
 DEPARTMENT_EMAILS = {
     "IT": "kashishchauhan616@gmail.com",
     "Maintenance": "24cse2048@mvn.edu.in",
     "Hostel": "24cse2048@mvn.edu.in",
-    "Library": "24cse2048@mvn.edu.in",
-    "Transport": "24cse2048@mvn.edu.in",
     "Electrical": "24cse2048@mvn.edu.in",
     "Security": "24cse2048@mvn.edu.in",
+    "Academic": "24cse2048@mvn.edu.in",
+    "Admin": "24cse2048@mvn.edu.in",
 }
+DEFAULT_EMAIL = "24cse2048@mvn.edu.in"
 
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
@@ -46,9 +53,84 @@ def get_db():
     return conn
 
 
+# ---------------------------------------------------------------
+# AUTOMATION HELPERS (emails lookup)
+# ---------------------------------------------------------------
+
+def ensure_columns():
+    """Adds student_name column to complaints if missing, and fixes
+    old student users whose student_id is empty."""
+    conn = get_db()
+    try:
+        conn.execute("ALTER TABLE complaints ADD COLUMN student_name TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # column already exists
+
+    conn.execute(
+        """
+        UPDATE users
+        SET student_id = id
+        WHERE role = 'student' AND student_id IS NULL
+        """
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_user_email(user_id):
+    """Email of the logged-in user (the one used for signup/login)."""
+    if not user_id:
+        return None
+    conn = get_db()
+    row = conn.execute(
+        "SELECT email FROM users WHERE id = ?", (user_id,)
+    ).fetchone()
+    conn.close()
+    return row["email"] if row and row["email"] else None
+
+
+def get_student_email_by_student_id(student_id):
+    """Email of a student using student_id (used when department updates status)."""
+    if not student_id:
+        return None
+    conn = get_db()
+    row = conn.execute(
+        "SELECT email FROM users WHERE role = 'student' AND student_id = ?",
+        (student_id,)
+    ).fetchone()
+    conn.close()
+    return row["email"] if row and row["email"] else None
+
+
+def get_department_email(department_name):
+    """Department email: first from users table (admin-added departments),
+    otherwise from the fallback dictionary."""
+    conn = get_db()
+    row = conn.execute(
+        """
+        SELECT email FROM users
+        WHERE role = 'department' AND department = ?
+        AND email IS NOT NULL AND email != ''
+        """,
+        (department_name,)
+    ).fetchone()
+    conn.close()
+
+    if row and row["email"]:
+        return row["email"]
+    return DEPARTMENT_EMAILS.get(department_name, DEFAULT_EMAIL)
+
+
+# ---------------------------------------------------------------
+# ROUTES
+# ---------------------------------------------------------------
+
 @app.route("/")
 def home():
     return app.send_static_file("index.html")
+
+
 @app.route("/send-otp", methods=["POST"])
 def send_otp():
 
@@ -90,6 +172,8 @@ Team InfraMind
     return jsonify({
         "message": "OTP sent successfully"
     })
+
+
 # LOGIN
 @app.route("/login", methods=["POST"])
 def login():
@@ -142,6 +226,8 @@ def login():
         "student_id": user["student_id"],
         "department": user["department"]
     })
+
+
 # STUDENT SIGNUP
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -158,8 +244,7 @@ def signup():
         }), 400
 
     import hashlib
-    import random
-    from datetime import datetime, timedelta
+    from datetime import timedelta
 
     password_hash = hashlib.sha256(
         password.encode()
@@ -210,7 +295,7 @@ def signup():
         }), 409
 
     # Create student account
-    conn.execute(
+    cursor = conn.execute(
         """
         INSERT INTO users
         (username, email, password, email_verified,
@@ -230,6 +315,13 @@ def signup():
         )
     )
 
+    # student_id = user id (so complaints and emails can be linked)
+    new_user_id = cursor.lastrowid
+    conn.execute(
+        "UPDATE users SET student_id = ? WHERE id = ?",
+        (new_user_id, new_user_id)
+    )
+
     conn.commit()
     conn.close()
 
@@ -240,13 +332,17 @@ def signup():
         "email": email
     }), 201
 
+
 # CREATE COMPLAINT
 @app.route("/complaints", methods=["POST"])
 def create_complaint():
 
     data = request.get_json()
 
-    student_id = data.get("student_id")
+    # Student identity comes from the login session (not from the form).
+    # data.get("student_id") is only a fallback for API testing.
+    student_id = session.get("student_id") or data.get("student_id")
+    student_name = data.get("student_name")
     title = data.get("title")
     description = data.get("description")
 
@@ -273,12 +369,13 @@ def create_complaint():
     conn.execute(
         """
         INSERT INTO complaints
-        (student_id, title, description, category, department,
+        (student_id, student_name, title, description, category, department,
          priority, status, deadline, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             student_id,
+            student_name,
             title,
             description,
             category,
@@ -299,24 +396,31 @@ def create_complaint():
 
     conn.close()
 
-    # Notify respective department
-    department_email = DEPARTMENT_EMAILS.get(
-        department,
-        "24cse2048@mvn.edu.in"
+    complaint_info = {
+        "id": new_id,
+        "student_name": student_name,
+        "title": title,
+        "description": description,
+        "category": category,
+        "department": department,
+        "priority": priority,
+        "deadline": deadline,
+        "status": status
+    }
+
+    # 1) Mail to the concerned department
+    notify_new_complaint(
+        get_department_email(department),
+        complaint_info
     )
 
-    notify_new_complaint(
-        department_email,
-        {
-            "id": new_id,
-            "title": title,
-            "description": description,
-            "category": category,
-            "priority": priority,
-            "deadline": deadline,
-            "status": status
-        }
-    )
+    # 2) Confirmation mail to the student (login email)
+    student_email = get_user_email(session.get("user_id"))
+    if not student_email:
+        student_email = get_student_email_by_student_id(student_id)
+
+    if student_email:
+        notify_complaint_registered(student_email, complaint_info)
 
     return jsonify({
         "message": "Complaint created successfully",
@@ -326,6 +430,8 @@ def create_complaint():
         "status": status,
         "deadline": deadline
     }), 201
+
+
 # STUDENT ANALYTICS
 @app.route("/student-analytics", methods=["GET"])
 def student_analytics():
@@ -358,6 +464,7 @@ def student_analytics():
         "resolved": sum(1 for c in complaints if c["status"] == "Resolved")
     })
 
+
 # ANALYTICS
 @app.route("/analytics", methods=["GET"])
 def analytics():
@@ -366,7 +473,7 @@ def analytics():
     if "user_id" not in session:
         return jsonify({"error": "Please login first"}), 401
 
-    # Student → only their complaints
+    # Student -> only their complaints
     if session.get("role") == "student":
 
         student_id = session.get("student_id")
@@ -396,8 +503,10 @@ def analytics():
             "resolved": resolved
         })
 
-    # Admin → all complaints
+    # Admin -> all complaints
     return jsonify(get_analytics_summary())
+
+
 # GET LOGGED-IN STUDENT'S COMPLAINTS
 @app.route("/my-complaints", methods=["GET"])
 def get_my_complaints():
@@ -431,6 +540,8 @@ def get_my_complaints():
     conn.close()
 
     return jsonify([dict(row) for row in complaints])
+
+
 # GET DEPARTMENT COMPLAINTS
 @app.route("/department-complaints", methods=["GET"])
 def get_department_complaints():
@@ -465,6 +576,8 @@ def get_department_complaints():
         dict(row)
         for row in complaints
     ])
+
+
 # GET ALL COMPLAINTS
 @app.route("/complaints", methods=["GET"])
 def get_complaints():
@@ -552,6 +665,17 @@ def update_status(complaint_id):
     conn.commit()
     conn.close()
 
+    # Mail the student about the status change
+    complaint_info = dict(complaint)
+    complaint_info["status"] = new_status
+
+    student_email = get_student_email_by_student_id(complaint["student_id"])
+    if student_email:
+        if new_status == "Resolved":
+            notify_resolved(student_email, complaint_info)
+        else:
+            notify_status_change(student_email, complaint_info)
+
     return jsonify({
         "message": "Complaint status updated successfully",
         "complaint_id": complaint_id,
@@ -561,6 +685,7 @@ def update_status(complaint_id):
 
 if __name__ == "__main__":
 
+    ensure_columns()
     start_scheduler()
 
     app.run(
