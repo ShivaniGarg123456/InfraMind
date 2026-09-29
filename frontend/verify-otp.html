@@ -1,15 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>InfraMind - Verify OTP</title>
-
     <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body>
@@ -17,19 +12,16 @@
     <div class="login-container">
 
         <h1>InfraMind</h1>
-
         <p>College Complaint Management System</p>
 
         <h2>Verify Email</h2>
 
-        <p>
-            Enter the OTP sent to your email address.
-        </p>
+        <p>Enter the OTP sent to your email address.</p>
 
         <input
             type="text"
             id="otp"
-            placeholder="Enter OTP"
+            placeholder="Enter 6-digit OTP"
             maxlength="6"
         >
 
@@ -45,54 +37,89 @@
 
     </div>
 
-
     <script>
 
-        function verifyOTP() {
+        async function verifyOTP() {
 
-            const otp =
-                document.getElementById("otp").value.trim();
+            const otp = document
+                .getElementById("otp")
+                .value
+                .trim();
 
+            const email = localStorage.getItem("signupEmail");
+
+            if (!email) {
+                showMessage("Signup session not found. Please register again.");
+                return;
+            }
 
             if (otp === "") {
-
-                showMessage(
-                    "Please enter the OTP."
-                );
-
+                showMessage("Please enter the OTP.");
                 return;
             }
-
-
-            /*
-                Temporary frontend flow.
-
-                Actual OTP verification will be
-                connected with the backend later.
-            */
 
             if (otp.length !== 6) {
-
-                showMessage(
-                    "Please enter a valid 6-digit OTP."
-                );
-
+                showMessage("Please enter a valid 6-digit OTP.");
                 return;
             }
 
+            showMessage("Verifying OTP...");
 
-            showMessage(
-                "Email verified successfully! Redirecting to login..."
-            );
+            try {
 
+                const response = await fetch("/verify-otp", {
 
-            setTimeout(function () {
+                    method: "POST",
 
-                window.location.href =
-                    "index.html";
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-            }, 1500);
+                    body: JSON.stringify({
+                        email: email,
+                        otp: otp
+                    })
 
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+
+                    showMessage(
+                        data.error || "Invalid OTP."
+                    );
+
+                    return;
+                }
+
+                showMessage(
+                    "Email verified successfully! Account created."
+                );
+
+                // Remove temporary signup data
+                localStorage.removeItem("signupName");
+                localStorage.removeItem("signupEmail");
+                localStorage.removeItem("signupPassword");
+
+                setTimeout(function () {
+
+                    window.location.href = "index.html";
+
+                }, 1500);
+
+            }
+            catch (error) {
+
+                console.error(
+                    "OTP verification error:",
+                    error
+                );
+
+                showMessage(
+                    "Could not connect to the server."
+                );
+            }
         }
 
 
@@ -101,11 +128,9 @@
             document.getElementById(
                 "otpMessage"
             ).textContent = message;
-
         }
 
     </script>
 
 </body>
-
 </html>

@@ -1,99 +1,501 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InfraMind - Submit Complaint</title>
-    <link rel="stylesheet" href="style.css">
+
+```
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>InfraMind - Submit Complaint</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f5f7fb;
+    }
+
+    .complaint-wrapper {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        box-sizing: border-box;
+    }
+
+    .complaint-card {
+        width: 100%;
+        max-width: 850px;
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 42px 50px;
+        box-sizing: border-box;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-header {
+        margin-bottom: 32px;
+    }
+
+    .form-header h1 {
+        margin: 0 0 10px;
+        font-size: 30px;
+        color: #2563eb;
+    }
+
+    .form-header p {
+        margin: 0;
+        color: #64748b;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .ai-info {
+        background: #eff6ff;
+        border-left: 4px solid #2563eb;
+        padding: 14px 16px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        color: #334155;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .field {
+        margin-bottom: 24px;
+    }
+
+    .field label {
+        display: block;
+        margin-bottom: 9px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .field input,
+    .field textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 15px;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #1e293b;
+        background: #ffffff;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    .field input {
+        height: 50px;
+    }
+
+    .field textarea {
+        min-height: 190px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+    .field input[readonly] {
+        background: #f8fafc;
+        color: #475569;
+        cursor: not-allowed;
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder {
+        color: #94a3b8;
+    }
+
+    .submit-btn {
+        width: 100%;
+        height: 52px;
+        border: none;
+        border-radius: 10px;
+        background: #2563eb;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .submit-btn:hover {
+        background: #1d4ed8;
+    }
+
+    #complaintMessage {
+        text-align: center;
+        min-height: 22px;
+        margin: 16px 0 0;
+        font-size: 14px;
+    }
+
+    .back-link {
+        display: block;
+        width: fit-content;
+        margin: 22px auto 0;
+        color: #2563eb;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 650px) {
+
+        .complaint-wrapper {
+            padding: 20px 12px;
+        }
+
+        .complaint-card {
+            padding: 28px 22px;
+        }
+
+        .form-header h1 {
+            font-size: 25px;
+        }
+
+    }
+
+</style>
+```
+
 </head>
 
 <body>
 
-    <div class="complaint-container">
+```
+<div class="complaint-wrapper">
 
-        <h1>Submit Complaint</h1>
-        <p>Tell us about your issue</p>
+    <div class="complaint-card">
 
-        <label for="studentId">Student ID</label>
-        <input id="studentId" type="number" placeholder="Enter your Student ID">
+        <div class="form-header">
 
-        <label for="complaintTitle">Complaint Title</label>
-        <input id="complaintTitle" type="text" placeholder="Enter complaint title">
+            <h1>Submit Your Complaint</h1>
 
-        <label for="complaintDescription">Complaint Description</label>
-        <textarea id="complaintDescription" placeholder="Describe your issue"></textarea>
+            <p>
+                Tell us what went wrong. Our AI system will
+                automatically identify the appropriate department,
+                priority, and resolution deadline.
+            </p>
 
-        <button onclick="submitComplaint()">
+        </div>
+
+
+        <div class="ai-info">
+
+            🤖 <strong>Smart Complaint Processing</strong><br>
+
+            Your complaint will be automatically classified
+            and routed to the concerned department.
+
+        </div>
+
+
+        <!-- Student Email -->
+
+        <div class="field">
+
+            <label for="studentEmail">
+                Student Email
+            </label>
+
+            <input
+                type="email"
+                id="studentEmail"
+                placeholder="Loading your email..."
+                readonly
+            >
+
+        </div>
+
+
+        <!-- Complaint Title -->
+
+        <div class="field">
+
+            <label for="title">
+                Complaint Title
+            </label>
+
+            <input
+                type="text"
+                id="title"
+                placeholder="e.g. Water cooler is not working"
+            >
+
+        </div>
+
+
+        <!-- Complaint Description -->
+
+        <div class="field">
+
+            <label for="description">
+                Describe Your Problem
+            </label>
+
+            <textarea
+                id="description"
+                placeholder="Please explain your problem in detail..."
+            ></textarea>
+
+        </div>
+
+
+        <!-- Submit Button -->
+
+        <button
+            class="submit-btn"
+            onclick="submitComplaint()"
+        >
             Submit Complaint
         </button>
 
-        <br>
 
-        <a href="dashboard.html" class="complaint-btn">
-            Back to Dashboard
+        <p id="complaintMessage"></p>
+
+
+        <a
+            href="dashboard.html"
+            class="back-link"
+        >
+            ← Back to Dashboard
         </a>
 
     </div>
 
-    <script>
+</div>
 
-        async function submitComplaint() {
 
-            const studentId = document.getElementById("studentId").value;
-            const title = document.getElementById("complaintTitle").value;
-            const description = document.getElementById("complaintDescription").value;
+<script>
 
-            if (studentId === "" || title === "" || description === "") {
-                alert("Please fill all the fields.");
-                return;
-            }
+    /*
+     * Load logged-in student's email
+     * from backend session.
+     */
+
+    window.addEventListener(
+        "DOMContentLoaded",
+        async function () {
 
             try {
 
-               const response = await fetch(
-    "/complaints",
+                const response =
+                    await fetch("/me");
+
+                const data =
+                    await response.json();
+
+
+                if (response.ok) {
+
+                    document.getElementById(
+                        "studentEmail"
+                    ).value = data.email || "";
+
+                } else {
+
+                    document.getElementById(
+                        "studentEmail"
+                    ).placeholder =
+                        "Email not available";
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Could not load student email:",
+                    error
+                );
+
+                document.getElementById(
+                    "studentEmail"
+                ).placeholder =
+                    "Could not load email";
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Submit complaint
+     */
+
+    async function submitComplaint() {
+
+        const title =
+            document.getElementById("title")
+            .value
+            .trim();
+
+
+        const description =
+            document.getElementById("description")
+            .value
+            .trim();
+
+
+        if (title === "") {
+
+            showMessage(
+                "Please enter a complaint title."
+            );
+
+            return;
+
+        }
+
+
+        if (description === "") {
+
+            showMessage(
+                "Please describe your problem."
+            );
+
+            return;
+
+        }
+
+
+        showMessage(
+            "Submitting complaint..."
+        );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/complaints",
                     {
                         method: "POST",
+
                         headers: {
-                            "Content-Type": "application/json"
+                            "Content-Type":
+                                "application/json"
                         },
+
+                        /*
+                         * IMPORTANT:
+                         * Do NOT send student_id
+                         * or email from frontend.
+                         *
+                         * Backend will get them
+                         * from the logged-in session.
+                         */
+
                         body: JSON.stringify({
-                            student_id: Number(studentId),
+
                             title: title,
+
                             description: description
+
                         })
+
                     }
                 );
 
-                const data = await response.json();
 
-                if (!response.ok) {
-                    alert(data.error || "Failed to submit complaint.");
-                    return;
-                }
+            const data =
+                await response.json();
 
-                alert(
-                    "Complaint submitted successfully!\n\n" +
-                    "Category: " + data.category + "\n" +
-                    "Department: " + data.department + "\n" +
-                    "Priority: " + data.priority + "\n" +
-                    "Status: " + data.status
+
+            if (!response.ok) {
+
+                showMessage(
+                    data.error ||
+                    "Failed to submit complaint."
                 );
 
-                window.location.href = "my-complaints.html";
+                return;
 
-            } catch (error) {
-
-                console.error("Error:", error);
-
-                alert(
-                    "Could not connect to the backend.\n" +
-                    "Please make sure the Flask server is running."
-                );
             }
+
+
+            showMessage(
+                "Complaint submitted successfully!"
+            );
+
+
+            document.getElementById(
+                "title"
+            ).value = "";
+
+
+            document.getElementById(
+                "description"
+            ).value = "";
+
+
+            setTimeout(
+                function () {
+
+                    window.location.href =
+                        "my-complaints.html";
+
+                },
+                1200
+            );
+
         }
 
-    </script>
+
+        catch (error) {
+
+            console.error(
+                "Complaint error:",
+                error
+            );
+
+
+            showMessage(
+                "Could not connect to the server."
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Show message
+     */
+
+    function showMessage(message) {
+
+        document.getElementById(
+            "complaintMessage"
+        ).textContent = message;
+
+    }
+
+</script>
+```
 
 </body>
+
 </html>
