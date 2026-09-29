@@ -10,42 +10,479 @@
 
     <link rel="stylesheet" href="style.css">
 
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #eef4ff, #f8faff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 950px;
+            min-height: 570px;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            box-shadow: 0 20px 60px rgba(30, 60, 120, 0.15);
+        }
+
+        /* LEFT SIDE */
+
+        .login-left {
+            padding: 55px 45px;
+            background: linear-gradient(145deg, #2563eb, #4f46e5);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 35px;
+        }
+
+        .brand-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .brand-name {
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .login-left h1 {
+            font-size: 38px;
+            line-height: 1.15;
+            margin: 0 0 18px;
+        }
+
+        .login-left > p {
+            font-size: 16px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.85);
+            margin: 0;
+            max-width: 390px;
+        }
+
+        .feature-list {
+            margin-top: 35px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            font-size: 15px;
+        }
+
+        .feature-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* RIGHT SIDE */
+
+        .login-right {
+            padding: 55px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-right h2 {
+            margin: 0 0 8px;
+            font-size: 30px;
+            color: #172033;
+        }
+
+        .login-subtitle {
+            margin: 0 0 30px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            height: 50px;
+            border: 1px solid #d9e0ec;
+            border-radius: 12px;
+            padding: 0 45px 0 15px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .input-wrapper input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.10);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8994a6;
+            font-size: 16px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: #687386;
+            font-size: 13px;
+            padding: 4px;
+        }
+
+        .password-toggle:hover {
+            color: #4f46e5;
+        }
+
+        .login-button {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: 0.2s;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.22);
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(79, 70, 229, 0.30);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        #loginMessage {
+            min-height: 20px;
+            margin: 15px 0 5px;
+            text-align: center;
+            color: #dc2626;
+            font-size: 13px;
+        }
+
+        .signup-text {
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+            margin-top: 22px;
+        }
+
+        .signup-text a {
+            color: #4f46e5;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .signup-text a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-text {
+            text-align: center;
+            color: #a0a8b5;
+            font-size: 11px;
+            margin-top: 30px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 750px) {
+
+            .login-wrapper {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .login-left {
+                padding: 35px;
+            }
+
+            .login-left h1 {
+                font-size: 30px;
+            }
+
+            .feature-list {
+                display: none;
+            }
+
+            .login-right {
+                padding: 40px 30px;
+            }
+
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
-    <div class="login-container">
+    <main class="login-wrapper">
 
-        <h1>InfraMind</h1>
 
-        <p>College Complaint Management System</p>
+        <!-- LEFT SIDE -->
 
-        <h2>Login</h2>
+        <section class="login-left">
 
-      <input
-    type="text"
-    id="username"
-    placeholder="Username / Email"
->
+            <header class="brand">
 
-        <input
-            type="password"
-            id="password"
-            placeholder="Password"
-        >
+                <div class="brand-icon">
+                    IM
+                </div>
 
-        <button onclick="loginUser()">
-            Login
-        </button>
+                <div class="brand-name">
+                    InfraMind
+                </div>
 
-        <p id="loginMessage"></p>
+            </header>
 
-        <p>
-            Don't have an account?
-            <a href="signup.html">Sign Up</a>
-        </p>
 
-    </div>
+            <section class="intro-section">
+
+                <h1>
+                    Smarter Complaint<br>
+                    Management
+                </h1>
+
+                <p>
+                    A smart college complaint management system
+                    designed to make reporting, tracking and
+                    resolving complaints easier.
+                </p>
+
+            </section>
+
+
+            <section class="feature-list" aria-label="InfraMind features">
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        ✓
+                    </div>
+
+                    <span>
+                        Submit and track complaints easily
+                    </span>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        ✓
+                    </div>
+
+                    <span>
+                        Smart department and priority management
+                    </span>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        ✓
+                    </div>
+
+                    <span>
+                        Faster and more organized resolution
+                    </span>
+
+                </div>
+
+
+            </section>
+
+        </section>
+
+
+        <!-- RIGHT SIDE -->
+
+        <section class="login-right">
+
+
+            <header class="login-header">
+
+                <h2>
+                    Welcome
+                </h2>
+
+                <p class="login-subtitle">
+                    Sign in to access your InfraMind dashboard.
+                </p>
+
+            </header>
+
+
+            <form class="login-form" onsubmit="event.preventDefault(); loginUser();">
+
+
+                <!-- USERNAME -->
+
+                <div class="input-group">
+
+                    <label for="username">
+                        Username / Email
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <input
+                            type="text"
+                            id="username"
+                            placeholder="Enter username or email"
+                        >
+
+                        <span class="input-icon" aria-hidden="true">
+                            ✉
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="input-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Enter your password"
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            onclick="togglePassword()"
+                            id="passwordToggle"
+                        >
+                            Show
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- LOGIN BUTTON -->
+
+                <button
+                    type="submit"
+                    class="login-button"
+                >
+                    Login
+                </button>
+
+
+                <p
+                    id="loginMessage"
+                    class="login-message"
+                    aria-live="polite"
+                ></p>
+
+
+            </form>
+
+
+            <!-- SIGN UP -->
+
+            <p class="signup-text">
+
+                Don't have an account?
+
+                <a href="signup.html">
+                    Sign Up
+                </a>
+
+            </p>
+
+
+            <!-- FOOTER -->
+
+            <footer class="footer-text">
+                InfraMind • College Complaint Management System
+            </footer>
+
+
+        </section>
+
+
+    </main>
 
 
     <script>
@@ -58,11 +495,12 @@
             const password =
                 document.getElementById("password").value;
 
+
             if (username === "" || password === "") {
 
                 showMessage(
-    "Please enter username/email and password."
-);
+                    "Please enter username/email and password."
+                );
 
                 return;
             }
@@ -100,7 +538,6 @@
                 }
 
 
-                // Save role
                 localStorage.setItem(
                     "userRole",
                     data.role
@@ -108,6 +545,7 @@
 
 
                 // Student
+
                 if (data.role === "student") {
 
                     localStorage.setItem(
@@ -121,6 +559,7 @@
 
 
                 // Admin
+
                 else if (data.role === "admin") {
 
                     window.location.href =
@@ -129,6 +568,7 @@
 
 
                 // Department
+
                 else if (data.role === "department") {
 
                     localStorage.setItem(
@@ -153,6 +593,7 @@
                 showMessage(
                     "Could not connect to the server."
                 );
+
             }
 
         }
@@ -163,6 +604,30 @@
             document.getElementById(
                 "loginMessage"
             ).textContent = message;
+
+        }
+
+
+        function togglePassword() {
+
+            const password =
+                document.getElementById("password");
+
+            const toggle =
+                document.getElementById("passwordToggle");
+
+
+            if (password.type === "password") {
+
+                password.type = "text";
+                toggle.textContent = "Hide";
+
+            } else {
+
+                password.type = "password";
+                toggle.textContent = "Show";
+
+            }
 
         }
 
