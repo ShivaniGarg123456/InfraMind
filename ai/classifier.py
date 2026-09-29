@@ -1,84 +1,83 @@
 """
 InfraMind - AI/NLP Complaint Classifier
-Member 3: Shashi
 
 Hybrid Complaint Classification:
 1. Rule-based classification for common complaints
-2. Gemini AI fallback for unknown complaints
+2. OpenRouter AI fallback for unknown complaints
 
 AI Output:
-    category
-    department
-    priority
-
-Priority:
-    Critical, High, Medium, Low
+- category
+- department
+- priority
 """
 
 import os
 import json
 import re
+import requests
 
 from dotenv import load_dotenv
-from google import genai
 
 
 # ============================================================
-# ENVIRONMENT / GEMINI SETUP
+# LOAD ENVIRONMENT VARIABLES
 # ============================================================
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ENV_PATH = os.path.join(BASE_DIR, ".env")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 
 load_dotenv(ENV_PATH)
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-client = None
+# Model can be changed later from .env without changing this code
+OPENROUTER_MODEL = os.getenv(
+    "OPENROUTER_MODEL",
+    "openrouter/free"
+)
 
-if GEMINI_API_KEY:
-    client = genai.Client(api_key=GEMINI_API_KEY)
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
 # ============================================================
-# KEYWORD MATCHING HELPER
+# KEYWORD HELPERS
 # ============================================================
 
 def contains_keyword(text, keyword):
     """
-    Check whether a keyword exists as a proper word/phrase.
-
-    This prevents bugs such as:
-        'ac' matching 'machine'
-
-    Examples:
-        AC is not working -> True
-        the AC is broken -> True
-        machine is broken -> False
+    Checks whether a complete keyword exists in the complaint.
+    Prevents accidental substring matches.
     """
-
-    pattern = r"\b" + re.escape(keyword.lower()) + r"\b"
-    return re.search(pattern, text.lower()) is not None
+    return bool(
+        re.search(
+            r"\b" + re.escape(keyword.lower()) + r"\b",
+            text.lower()
+        )
+    )
 
 
 def contains_any_keyword(text, keywords):
-    """Return True if any keyword matches properly."""
+    """
+    Returns True if any keyword exists in the complaint.
+    """
     return any(contains_keyword(text, keyword) for keyword in keywords)
 
 
 # ============================================================
-# GEMINI FALLBACK
+# OPENROUTER AI FALLBACK
 # ============================================================
 
-def classify_with_gemini(complaint):
+def classify_with_openrouter(complaint):
     """
-    Use Gemini only when rule-based classification
-    cannot identify the complaint.
+    Uses OpenRouter AI when no rule-based keyword matches.
     """
 
-    if client is None:
-        print("Gemini API key not found. Using safe default.")
+    # --------------------------------------------------------
+    # If API key is missing, use safe default
+    # --------------------------------------------------------
 
+    if not OPENROUTER_API_KEY:
+        print("WARNING: OPENROUTER_API_KEY not found.")
         return {
             "category": "Other",
             "department": "Admin",
@@ -86,16 +85,20 @@ def classify_with_gemini(complaint):
         }
 
     prompt = f"""
-You are the AI complaint classifier for a college administration
-system called InfraMind.
+You are the AI complaint classification system for a college
+complaint management platform called InfraMind.
 
-Analyze this student complaint:
+Analyze the following student complaint and classify it.
 
+Complaint:
 "{complaint}"
 
 Return ONLY valid JSON.
+Do not write explanations.
+Do not use Markdown.
+Do not add ```json.
 
-The JSON must contain exactly these three keys:
+The JSON must contain exactly these keys:
 
 {{
     "category": "...",
@@ -103,13 +106,7 @@ The JSON must contain exactly these three keys:
     "priority": "..."
 }}
 
-Allowed priority values:
-- Critical
-- High
-- Medium
-- Low
-
-Possible departments:
+Allowed departments:
 - IT
 - Maintenance
 - Electrical
@@ -117,77 +114,124 @@ Possible departments:
 - Admin
 - Academic
 - Security
-- Library
-- Transport
 
-Choose a short and meaningful category based on the complaint.
+Allowed priorities:
+- Critical
+- High
+- Medium
+- Low
 
-Priority rules:
+Priority guidelines:
 
 Critical:
-- fire
-- smoke
-- gas leak
-- electric shock
-- flooding
-- major electrical danger
+- Fire
+- Smoke
+- Gas leak
+- Electric shock
+- Flooding
+- Major electrical danger
+- Immediate safety risk
 
 High:
-- computers
-- servers
-- network
+- Computers
+- Servers
+- Network
 - WiFi
-- security
-- exams
-- major academic operations
+- Internet
+- Security systems
+- CCTV
+- Important examination problems
+- Major academic operations
 
 Medium:
-- fan
+- Fan
 - AC
-- light
-- projector
-- water
-- hostel
-- normal academic problems
+- Light
+- Projector
+- Water
+- Hostel problems
+- Normal academic issues
+- Fees or administrative issues
 
 Low:
-- cleaning
-- dustbin
-- chair
-- desk
-- furniture
-- other minor non-urgent problems
+- Cleaning
+- Dustbin
+- Dust
+- Chair
+- Desk
+- Furniture
+- Minor maintenance issues
 
-Do not add explanations.
-Return JSON only.
+Choose the department that is most relevant to the complaint.
 """
 
+
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
+
+        # ----------------------------------------------------
+        # OpenRouter API Request
+        # ----------------------------------------------------
+
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "model": OPENROUTER_MODEL,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "temperature": 0
+        }
+
+        response = requests.post(
+            OPENROUTER_URL,
+            headers=headers,
+            json=payload,
+            timeout=30
         )
 
-        response_text = response.text.strip()
+        # Raise error for HTTP errors
+        response.raise_for_status()
 
-        # Remove markdown code fences if Gemini returns them
-        if response_text.startswith("```"):
-            response_text = response_text.replace("```json", "")
-            response_text = response_text.replace("```", "")
-            response_text = response_text.strip()
+        data = response.json()
 
-        result = json.loads(response_text)
+        # ----------------------------------------------------
+        # Extract AI response
+        # ----------------------------------------------------
 
-        category = result.get("category")
-        department = result.get("department")
-        priority = result.get("priority")
+        ai_text = data["choices"][0]["message"]["content"].strip()
 
-        allowed_priorities = {
-            "Critical",
-            "High",
-            "Medium",
-            "Low"
-        }
+        # Remove accidental Markdown code fences
+        ai_text = re.sub(
+            r"^```json\s*",
+            "",
+            ai_text,
+            flags=re.IGNORECASE
+        )
+
+        ai_text = re.sub(
+            r"^```\s*",
+            "",
+            ai_text
+        )
+
+        ai_text = re.sub(
+            r"\s*```$",
+            "",
+            ai_text
+        )
+
+        # Convert JSON text to Python dictionary
+        result = json.loads(ai_text)
+
+        # ----------------------------------------------------
+        # Allowed values
+        # ----------------------------------------------------
 
         allowed_departments = {
             "IT",
@@ -196,28 +240,64 @@ Return JSON only.
             "Hostel",
             "Admin",
             "Academic",
-            "Security",
-            "Library",
-            "Transport"
+            "Security"
         }
 
-        if not category:
-            category = "Other"
+        allowed_priorities = {
+            "Critical",
+            "High",
+            "Medium",
+            "Low"
+        }
+
+        # ----------------------------------------------------
+        # Validate department
+        # ----------------------------------------------------
+
+        department = result.get("department", "Admin")
 
         if department not in allowed_departments:
             department = "Admin"
 
+        # ----------------------------------------------------
+        # Validate priority
+        # ----------------------------------------------------
+
+        priority = result.get("priority", "Low")
+
         if priority not in allowed_priorities:
             priority = "Low"
 
-        return {
-            "category": category,
+        # ----------------------------------------------------
+        # Validate category
+        # ----------------------------------------------------
+
+        category = result.get("category", "Other")
+
+        if not category:
+            category = "Other"
+
+        # ----------------------------------------------------
+        # Final validated result
+        # ----------------------------------------------------
+
+        final_result = {
+            "category": str(category).strip(),
             "department": department,
             "priority": priority
         }
 
-    except Exception as error:
-        print("Gemini classification failed:", error)
+        print("OpenRouter classification:", final_result)
+
+        return final_result
+
+    except Exception as e:
+
+        # ----------------------------------------------------
+        # Safe fallback
+        # ----------------------------------------------------
+
+        print("OpenRouter classification failed:", e)
 
         return {
             "category": "Other",
@@ -231,18 +311,6 @@ Return JSON only.
 # ============================================================
 
 def classify_complaint(complaint):
-    """
-    Hybrid complaint classifier.
-
-    Step 1:
-        Try rule-based classification.
-
-    Step 2:
-        If no rule matches, send complaint to Gemini.
-
-    Step 3:
-        If Gemini fails, use safe default.
-    """
 
     if not complaint:
         return {
@@ -253,8 +321,9 @@ def classify_complaint(complaint):
 
     text = complaint.lower().strip()
 
+
     # ========================================================
-    # CRITICAL
+    # CRITICAL COMPLAINTS
     # ========================================================
 
     critical_keywords = [
@@ -270,30 +339,30 @@ def classify_complaint(complaint):
 
     if contains_any_keyword(text, critical_keywords):
 
-        if contains_any_keyword(
-            text,
-            ["gas leak", "gas leakage"]
-        ):
+        if contains_any_keyword(text, [
+            "gas leak",
+            "gas leakage"
+        ]):
             return {
                 "category": "Gas Leak",
                 "department": "Maintenance",
                 "priority": "Critical"
             }
 
-        elif contains_any_keyword(
-            text,
-            ["flood", "flooding"]
-        ):
+        elif contains_any_keyword(text, [
+            "flood",
+            "flooding"
+        ]):
             return {
                 "category": "Water/Flood",
                 "department": "Maintenance",
                 "priority": "Critical"
             }
 
-        elif contains_any_keyword(
-            text,
-            ["fire", "smoke"]
-        ):
+        elif contains_any_keyword(text, [
+            "fire",
+            "smoke"
+        ]):
             return {
                 "category": "Fire/Safety",
                 "department": "Security",
@@ -307,193 +376,227 @@ def classify_complaint(complaint):
                 "priority": "Critical"
             }
 
+
     # ========================================================
-    # HIGH - IT / LAB
+    # HIGH PRIORITY - IT / LAB
     # ========================================================
 
-    if contains_any_keyword(text, [
+    high_it_keywords = [
         "computer",
         "computers",
         "pc",
         "desktop",
         "laptop",
         "server"
-    ]):
+    ]
+
+    if contains_any_keyword(text, high_it_keywords):
         return {
             "category": "Lab",
             "department": "IT",
             "priority": "High"
         }
 
+
     # ========================================================
-    # HIGH - NETWORK
+    # HIGH PRIORITY - NETWORK
     # ========================================================
 
-    if contains_any_keyword(text, [
+    high_network_keywords = [
         "wifi",
         "wi-fi",
         "internet",
         "network",
         "router",
         "connection"
-    ]):
+    ]
+
+    if contains_any_keyword(text, high_network_keywords):
         return {
             "category": "Network",
             "department": "IT",
             "priority": "High"
         }
 
+
     # ========================================================
-    # HIGH - SECURITY
+    # HIGH PRIORITY - SECURITY
     # ========================================================
 
-    if contains_any_keyword(text, [
+    high_security_keywords = [
         "security",
         "security guard",
         "theft",
         "stolen",
         "cctv",
         "camera"
-    ]):
+    ]
+
+    if contains_any_keyword(text, high_security_keywords):
         return {
             "category": "Security",
             "department": "Security",
             "priority": "High"
         }
 
+
     # ========================================================
-    # HIGH - EXAM
+    # HIGH PRIORITY - EXAM
     # ========================================================
 
-    if contains_any_keyword(text, [
+    high_exam_keywords = [
         "exam",
         "examination",
         "question paper",
         "admit card",
         "hall ticket"
-    ]):
+    ]
+
+    if contains_any_keyword(text, high_exam_keywords):
         return {
             "category": "Exam",
             "department": "Academic",
             "priority": "High"
         }
 
+
     # ========================================================
-    # MEDIUM - FAN / AC
+    # MEDIUM - COOLING
     # ========================================================
 
-    if contains_any_keyword(text, [
+    cooling_keywords = [
         "fan",
         "air conditioner",
         "air conditioning",
         "ac"
-    ]):
+    ]
+
+    if contains_any_keyword(text, cooling_keywords):
         return {
             "category": "Cooling",
             "department": "Electrical",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - LIGHT / ELECTRICITY
     # ========================================================
 
-    if contains_any_keyword(text, [
+    electricity_keywords = [
         "light",
         "bulb",
         "electricity",
         "switch",
         "power"
-    ]):
+    ]
+
+    if contains_any_keyword(text, electricity_keywords):
         return {
             "category": "Electrical",
             "department": "Electrical",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - PROJECTOR
     # ========================================================
 
-    if contains_any_keyword(text, [
+    projector_keywords = [
         "projector",
         "display"
-    ]):
+    ]
+
+    if contains_any_keyword(text, projector_keywords):
         return {
             "category": "Projector",
             "department": "IT",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - WATER
     # ========================================================
 
-    if contains_any_keyword(text, [
+    water_keywords = [
         "water",
         "tap",
         "drinking water",
         "water cooler"
-    ]):
+    ]
+
+    if contains_any_keyword(text, water_keywords):
         return {
             "category": "Water",
             "department": "Maintenance",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - HOSTEL
     # ========================================================
 
-    if contains_any_keyword(text, [
+    hostel_keywords = [
         "hostel room",
         "hostel"
-    ]):
+    ]
+
+    if contains_any_keyword(text, hostel_keywords):
         return {
             "category": "Hostel",
             "department": "Hostel",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # LOW - CLEANING
     # ========================================================
 
-    if contains_any_keyword(text, [
+    cleaning_keywords = [
         "cleaning",
         "dirty",
         "dust",
         "dustbin",
         "garbage"
-    ]):
+    ]
+
+    if contains_any_keyword(text, cleaning_keywords):
         return {
             "category": "Cleaning",
             "department": "Maintenance",
             "priority": "Low"
         }
 
+
     # ========================================================
     # LOW - FURNITURE
     # ========================================================
 
-    if contains_any_keyword(text, [
+    furniture_keywords = [
         "chair",
         "desk",
         "table",
         "bench",
         "furniture"
-    ]):
+    ]
+
+    if contains_any_keyword(text, furniture_keywords):
         return {
             "category": "Furniture",
             "department": "Maintenance",
             "priority": "Low"
         }
 
+
     # ========================================================
     # MEDIUM - ACADEMIC
     # ========================================================
 
-    if contains_any_keyword(text, [
+    academic_keywords = [
         "teacher",
         "faculty",
         "class",
@@ -501,18 +604,21 @@ def classify_complaint(complaint):
         "attendance",
         "assignment",
         "subject"
-    ]):
+    ]
+
+    if contains_any_keyword(text, academic_keywords):
         return {
             "category": "Academic",
             "department": "Academic",
             "priority": "Medium"
         }
 
+
     # ========================================================
     # MEDIUM - ADMINISTRATIVE
     # ========================================================
 
-    if contains_any_keyword(text, [
+    admin_keywords = [
         "fee",
         "fees",
         "scholarship",
@@ -522,20 +628,26 @@ def classify_complaint(complaint):
         "registration",
         "administration",
         "admin"
-    ]):
+    ]
+
+    if contains_any_keyword(text, admin_keywords):
         return {
             "category": "Administrative",
             "department": "Admin",
             "priority": "Medium"
         }
 
+
     # ========================================================
-    # GEMINI FALLBACK
+    # NO KEYWORD MATCH
+    #
+    # Send unknown complaint to OpenRouter
     # ========================================================
 
-    print("No rule matched. Sending complaint to Gemini...")
+    print("No rule-based keyword matched.")
+    print("Sending complaint to OpenRouter...")
 
-    return classify_with_gemini(complaint)
+    return classify_with_openrouter(complaint)
 
 
 # ============================================================
@@ -547,31 +659,33 @@ if __name__ == "__main__":
     test_complaints = [
 
         # Rule-based tests
-        "Five computers in the CSE lab are not working",
-        "The college WiFi is not working",
-        "There is a fire in the hostel",
-        "The classroom AC is not working",
-        "The classroom fan is broken",
-        "The classroom is very dirty",
+        "Five computers in CSE lab are not working.",
+        "WiFi is not working in the library.",
+        "There is a fire in the laboratory.",
+        "The AC in classroom 302 is not working.",
+        "The classroom is dirty.",
+        "The projector is not working.",
 
-        # Academic rule test
-        "The biometric machine keeps rejecting my attendance",
-
-        # Gemini fallback tests
-        "My parking pass is not being accepted at the campus gate",
-        "The biometric scanner refuses to recognize my fingerprint",
-        "The campus bus tracking display is showing incorrect information"
+        # OpenRouter fallback tests
+        "The biometric machine keeps rejecting valid student entries.",
+        "The parking pass scanner is not recognizing student cards.",
+        "The campus bus tracking display is showing incorrect information."
     ]
 
-    print("\n========== InfraMind AI Complaint Classifier ==========\n")
 
-    for number, complaint in enumerate(test_complaints, start=1):
+    print("\n==============================")
+    print("INFRA MIND CLASSIFIER TEST")
+    print("==============================\n")
 
-        print(f"Test {number}")
-        print(f"Complaint: {complaint}")
+
+    for complaint in test_complaints:
+
+        print("Complaint:")
+        print(complaint)
 
         result = classify_complaint(complaint)
 
-        print(f"AI Output: {result}")
+        print("Result:")
+        print(result)
 
         print("-" * 60)
