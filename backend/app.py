@@ -22,8 +22,13 @@ from ai.classifier import classify_complaint
 from automation.deadline import calculate_deadline
 from automation.scheduler import start_scheduler
 from automation.analytics import get_analytics_summary
-from automation.notifications import send_notification
-
+from automation.notifications import (
+    send_notification,
+    notify_new_complaint,
+    notify_complaint_registered,
+    notify_status_change,
+    notify_resolved,
+)
 
 # =========================================================
 # FLASK APP
@@ -57,7 +62,33 @@ def get_db():
 
     return conn
 
+DEPARTMENT_EMAILS = {
+    "IT": "kashishchauhan616@gmail.com",
+    "Maintenance": "24cse2048@mvn.edu.in",
+    "Hostel": "24cse2048@mvn.edu.in",
+    "Electrical": "24cse2048@mvn.edu.in",
+    "Security": "24cse2048@mvn.edu.in",
+    "Academic": "24cse2048@mvn.edu.in",
+    "Admin": "24cse2048@mvn.edu.in",
+}
+DEFAULT_EMAIL = "24cse2048@mvn.edu.in"
 
+
+def get_department_email(department_name):
+    conn = get_db()
+    row = conn.execute(
+        """
+        SELECT email FROM users
+        WHERE role = 'department' AND department = ?
+        AND email IS NOT NULL AND email != ''
+        """,
+        (department_name,)
+    ).fetchone()
+    conn.close()
+
+    if row and row["email"]:
+        return row["email"]
+    return DEPARTMENT_EMAILS.get(department_name, DEFAULT_EMAIL)
 # =========================================================
 # ENSURE USER COLUMNS
 # =========================================================
@@ -637,23 +668,27 @@ def create_complaint():
     conn.commit()
     conn.close()
 
-    # =====================================================
-    # NO COMPLAINT EMAILS FROM BACKEND
-    # =====================================================
-    #
-    # IMPORTANT:
-    #
-    # No email is sent here.
-    #
+   
     # Automation member will handle:
-    #
-    # 1. Department notification
-    # 2. Student complaint confirmation
-    # 3. Resolution email
-    # 4. Deadline reminder
-    # 5. Escalation email
-    #
-    # =====================================================
+    complaint_info = {
+    "id": new_id,
+    "student_name": student["username"],
+    "title": title,
+    "description": description,
+    "category": category,
+    "department": department,
+    "priority": priority,
+    "deadline": deadline,
+    "status": status,
+}
+
+# Department ko mail
+notify_new_complaint(get_department_email(department), complaint_info)
+
+# Student ko confirmation (email uske account se, jaise signup/OTP verify mein diya tha)
+if student["email"]:
+    notify_complaint_registered(student["email"], complaint_info)
+    
 
     return jsonify({
         "message": "Complaint created successfully",
@@ -1095,7 +1130,7 @@ def update_status(complaint_id):
     # UPDATE STATUS
     # -----------------------------------------------------
 
-    conn.execute(
+        conn.execute(
         """
         UPDATE complaints
         SET status = ?, updated_at = ?
@@ -1108,8 +1143,21 @@ def update_status(complaint_id):
         )
     )
 
+    student_row = conn.execute(
+        "SELECT email FROM users WHERE student_id = ?",
+        (complaint["student_id"],)
+    ).fetchone()
+
     conn.commit()
     conn.close()
+
+    if student_row and student_row["email"]:
+        complaint_info = dict(complaint)
+        complaint_info["status"] = new_status
+        if new_status == "Resolved":
+            notify_resolved(student_row["email"], complaint_info)
+        else:
+            notify_status_change(student_row["email"], complaint_info)
 
     return jsonify({
         "message": "Complaint status updated successfully",
