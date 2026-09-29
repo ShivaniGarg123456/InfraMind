@@ -665,30 +665,27 @@ def create_complaint():
 
     new_id = cursor.lastrowid
 
-    conn.commit()
+       conn.commit()
     conn.close()
 
-   
-    # Automation member will handle:
     complaint_info = {
-    "id": new_id,
-    "student_name": student["username"],
-    "title": title,
-    "description": description,
-    "category": category,
-    "department": department,
-    "priority": priority,
-    "deadline": deadline,
-    "status": status,
-}
+        "id": new_id,
+        "student_name": student["username"],
+        "title": title,
+        "description": description,
+        "category": category,
+        "department": department,
+        "priority": priority,
+        "deadline": deadline,
+        "status": status,
+    }
 
-# Department ko mail
-notify_new_complaint(get_department_email(department), complaint_info)
+    # Department ko mail
+    notify_new_complaint(get_department_email(department), complaint_info)
 
-# Student ko confirmation (email uske account se, jaise signup/OTP verify mein diya tha)
-if student["email"]:
-    notify_complaint_registered(student["email"], complaint_info)
-    
+    # Student ko confirmation
+    if student["email"]:
+        notify_complaint_registered(student["email"], complaint_info)
 
     return jsonify({
         "message": "Complaint created successfully",
@@ -1130,7 +1127,11 @@ def update_status(complaint_id):
     # UPDATE STATUS
     # -----------------------------------------------------
 
-        conn.execute(
+        # -----------------------------------------------------
+    # UPDATE STATUS
+    # -----------------------------------------------------
+
+    conn.execute(
         """
         UPDATE complaints
         SET status = ?, updated_at = ?
