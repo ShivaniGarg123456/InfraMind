@@ -1,17 +1,35 @@
-import sqlite3
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from dotenv import load_dotenv
+
+
+# Load .env from project root
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+
+def get_db():
+    database_url = os.getenv("DATABASE_URL")
+
+    if not database_url:
+        raise ValueError("DATABASE_URL is not set in .env")
+
+    return psycopg2.connect(
+        database_url,
+        cursor_factory=RealDictCursor
+    )
 
 
 def create_database():
 
-    conn = sqlite3.connect("inframind.db")
-
+    conn = get_db()
     cursor = conn.cursor()
-
 
     # Complaints table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS complaints (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             student_id INTEGER,
             title TEXT NOT NULL,
             description TEXT NOT NULL,
@@ -25,11 +43,10 @@ def create_database():
         )
     """)
 
-
     # Users table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
             email TEXT UNIQUE,
@@ -42,35 +59,9 @@ def create_database():
         )
     """)
 
-
-    # Add new columns to existing database if they don't exist
-    existing_columns = [
-        row[1]
-        for row in cursor.execute("PRAGMA table_info(users)").fetchall()
-    ]
-
-    if "email" not in existing_columns:
-        cursor.execute(
-            "ALTER TABLE users ADD COLUMN email TEXT"
-        )
-
-    if "email_verified" not in existing_columns:
-        cursor.execute(
-            "ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0"
-        )
-
-    if "otp" not in existing_columns:
-        cursor.execute(
-            "ALTER TABLE users ADD COLUMN otp TEXT"
-        )
-
-    if "otp_expiry" not in existing_columns:
-        cursor.execute(
-            "ALTER TABLE users ADD COLUMN otp_expiry TEXT"
-        )
-
-
     conn.commit()
+
+    cursor.close()
     conn.close()
 
 
@@ -78,4 +69,4 @@ if __name__ == "__main__":
 
     create_database()
 
-    print("Database created successfully!")
+    print("Central PostgreSQL database connected successfully!")

@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
-import sqlite3
 from datetime import datetime, timedelta
 import sys
 import os
@@ -23,6 +22,9 @@ from automation.deadline import calculate_deadline
 from automation.scheduler import start_scheduler
 from automation.analytics import get_analytics_summary
 from automation.notifications import send_notification
+
+# PostgreSQL database
+from database import get_db, create_database
 
 
 # =========================================================
@@ -47,57 +49,12 @@ CORS(
 
 
 # =========================================================
-# DATABASE
+# HOME
 # =========================================================
 
-def get_db():
-
-    conn = sqlite3.connect("inframind.db")
-    conn.row_factory = sqlite3.Row
-
-    return conn
-
-
-# =========================================================
-# ENSURE USER COLUMNS
-# =========================================================
-
-def ensure_user_columns():
-
-    conn = get_db()
-
-    columns = conn.execute(
-        "PRAGMA table_info(users)"
-    ).fetchall()
-
-    existing_columns = {
-        column["name"]
-        for column in columns
-    }
-
-    required_columns = {
-        "email": "TEXT",
-        "email_verified": "INTEGER DEFAULT 0",
-        "otp": "TEXT",
-        "otp_expiry": "TEXT"
-    }
-
-    for column_name, column_type in required_columns.items():
-
-        if column_name not in existing_columns:
-
-            conn.execute(
-                f"""
-                ALTER TABLE users
-                ADD COLUMN {column_name} {column_type}
-                """
-            )
-
-    conn.commit()
-    conn.close()
-
-
-ensure_user_columns()
+@app.route("/")
+def home():
+    return app.send_static_file("index.html")
 
 
 # =========================================================
@@ -117,7 +74,7 @@ def get_logged_in_user():
         """
         SELECT *
         FROM users
-        WHERE id = ?
+        WHERE id = %s
         """,
         (user_id,)
     ).fetchone()
@@ -149,7 +106,7 @@ def get_logged_in_student():
             role,
             student_id
         FROM users
-        WHERE id = ?
+        WHERE id = %s
         AND role = 'student'
         """,
         (user_id,)
@@ -158,16 +115,6 @@ def get_logged_in_student():
     conn.close()
 
     return student
-
-
-# =========================================================
-# HOME
-# =========================================================
-
-@app.route("/")
-def home():
-
-    return app.send_static_file("index.html")
 
 
 # =========================================================
@@ -229,7 +176,7 @@ def send_otp():
         """
         SELECT id
         FROM users
-        WHERE LOWER(email) = ?
+        WHERE LOWER(email) = %s
         """,
         (email,)
     ).fetchone()
@@ -335,7 +282,7 @@ def verify_otp():
         """
         SELECT id
         FROM users
-        WHERE LOWER(email) = ?
+        WHERE LOWER(email) = %s
         """,
         (email,)
     ).fetchone()
@@ -353,6 +300,7 @@ def verify_otp():
 
     username = email
 
+    # PostgreSQL: RETURNING id
     cursor = conn.execute(
         """
         INSERT INTO users
@@ -367,7 +315,8 @@ def verify_otp():
             student_id,
             department
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id
         """,
         (
             username,
@@ -382,15 +331,15 @@ def verify_otp():
         )
     )
 
-    user_id = cursor.lastrowid
+    user_id = cursor.fetchone()["id"]
 
     student_id = 1000 + user_id
 
     conn.execute(
         """
         UPDATE users
-        SET student_id = ?
-        WHERE id = ?
+        SET student_id = %s
+        WHERE id = %s
         """,
         (
             student_id,
@@ -440,8 +389,8 @@ def login():
         """
         SELECT *
         FROM users
-        WHERE LOWER(username) = ?
-        AND password = ?
+        WHERE LOWER(username) = %s
+        AND password = %s
         """,
         (
             username,
@@ -497,19 +446,11 @@ def signup():
 @app.route("/complaints", methods=["POST"])
 def create_complaint():
 
-    # -----------------------------------------------------
-    # Check login
-    # -----------------------------------------------------
-
     if "user_id" not in session:
 
         return jsonify({
             "error": "Please login first"
         }), 401
-
-    # -----------------------------------------------------
-    # Only students
-    # -----------------------------------------------------
 
     if session.get("role") != "student":
 
@@ -521,10 +462,6 @@ def create_complaint():
 
     title = data.get("title")
     description = data.get("description")
-
-    # -----------------------------------------------------
-    # Validate
-    # -----------------------------------------------------
 
     if not title or not description:
 
@@ -540,10 +477,6 @@ def create_complaint():
         return jsonify({
             "error": "Title and description cannot be empty"
         }), 400
-
-    # -----------------------------------------------------
-    # GET LOGGED-IN STUDENT
-    # -----------------------------------------------------
 
     student = get_logged_in_student()
 
@@ -566,10 +499,7 @@ def create_complaint():
         student_id
     )
 
-    # -----------------------------------------------------
-    # AI CLASSIFICATION
-    # -----------------------------------------------------
-
+    # AI classification
     ai_result = classify_complaint(description)
 
     category = ai_result["category"]
@@ -578,29 +508,17 @@ def create_complaint():
 
     status = "Pending"
 
-    # -----------------------------------------------------
-    # TIME
-    # -----------------------------------------------------
-
     created_at = datetime.now()
-
     now = created_at.isoformat()
-
-    # -----------------------------------------------------
-    # DEADLINE
-    # -----------------------------------------------------
 
     deadline = calculate_deadline(
         priority,
         created_at
     ).isoformat()
 
-    # -----------------------------------------------------
-    # SAVE COMPLAINT
-    # -----------------------------------------------------
-
     conn = get_db()
 
+    # PostgreSQL: RETURNING id
     cursor = conn.execute(
         """
         INSERT INTO complaints
@@ -616,7 +534,8 @@ def create_complaint():
             created_at,
             updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id
         """,
         (
             student_id,
@@ -632,28 +551,10 @@ def create_complaint():
         )
     )
 
-    new_id = cursor.lastrowid
+    new_id = cursor.fetchone()["id"]
 
     conn.commit()
     conn.close()
-
-    # =====================================================
-    # NO COMPLAINT EMAILS FROM BACKEND
-    # =====================================================
-    #
-    # IMPORTANT:
-    #
-    # No email is sent here.
-    #
-    # Automation member will handle:
-    #
-    # 1. Department notification
-    # 2. Student complaint confirmation
-    # 3. Resolution email
-    # 4. Deadline reminder
-    # 5. Escalation email
-    #
-    # =====================================================
 
     return jsonify({
         "message": "Complaint created successfully",
@@ -702,7 +603,7 @@ def student_analytics():
         """
         SELECT status
         FROM complaints
-        WHERE student_id = ?
+        WHERE student_id = %s
         """,
         (student_id,)
     ).fetchall()
@@ -742,10 +643,6 @@ def analytics():
             "error": "Please login first"
         }), 401
 
-    # -----------------------------------------------------
-    # STUDENT
-    # -----------------------------------------------------
-
     if session.get("role") == "student":
 
         student = get_logged_in_student()
@@ -764,7 +661,7 @@ def analytics():
             """
             SELECT status
             FROM complaints
-            WHERE student_id = ?
+            WHERE student_id = %s
             """,
             (student_id,)
         ).fetchall()
@@ -789,10 +686,6 @@ def analytics():
                 if c["status"] == "Resolved"
             )
         })
-
-    # -----------------------------------------------------
-    # ADMIN
-    # -----------------------------------------------------
 
     if session.get("role") != "admin":
 
@@ -840,7 +733,7 @@ def get_my_complaints():
         """
         SELECT *
         FROM complaints
-        WHERE student_id = ?
+        WHERE student_id = %s
         ORDER BY id DESC
         """,
         (student_id,)
@@ -889,7 +782,7 @@ def get_department_complaints():
         """
         SELECT *
         FROM complaints
-        WHERE department = ?
+        WHERE department = %s
         ORDER BY id DESC
         """,
         (department,)
@@ -903,7 +796,6 @@ def get_department_complaints():
     ])
 
 
-
 # =========================================================
 # GET ALL COMPLAINTS - ADMIN
 # =========================================================
@@ -911,20 +803,11 @@ def get_department_complaints():
 @app.route("/complaints", methods=["GET"])
 def get_complaints():
 
-    # -----------------------------------------------------
-    # Check login
-    # -----------------------------------------------------
-
     if "user_id" not in session:
 
         return jsonify({
             "error": "Please login first"
         }), 401
-
-
-    # -----------------------------------------------------
-    # Only admin can view all complaints
-    # -----------------------------------------------------
 
     if session.get("role") != "admin":
 
@@ -932,13 +815,7 @@ def get_complaints():
             "error": "Access denied"
         }), 403
 
-
     conn = get_db()
-
-
-    # -----------------------------------------------------
-    # Get complaints + student email
-    # -----------------------------------------------------
 
     complaints = conn.execute(
         """
@@ -952,16 +829,12 @@ def get_complaints():
         """
     ).fetchall()
 
-
     conn.close()
-
 
     return jsonify([
         dict(row)
         for row in complaints
     ])
-
-
 
 
 # =========================================================
@@ -986,7 +859,7 @@ def get_complaint(complaint_id):
         """
         SELECT *
         FROM complaints
-        WHERE id = ?
+        WHERE id = %s
         """,
         (complaint_id,)
     ).fetchone()
@@ -1054,7 +927,7 @@ def update_status(complaint_id):
         """
         SELECT *
         FROM complaints
-        WHERE id = ?
+        WHERE id = %s
         """,
         (complaint_id,)
     ).fetchone()
@@ -1067,10 +940,7 @@ def update_status(complaint_id):
             "error": "Complaint not found"
         }), 404
 
-    # -----------------------------------------------------
     # Department restriction
-    # -----------------------------------------------------
-
     if session.get("role") == "department":
 
         user = get_logged_in_user()
@@ -1091,15 +961,13 @@ def update_status(complaint_id):
                 "error": "You cannot update complaints from another department."
             }), 403
 
-    # -----------------------------------------------------
-    # UPDATE STATUS
-    # -----------------------------------------------------
-
+    # Update status
     conn.execute(
         """
         UPDATE complaints
-        SET status = ?, updated_at = ?
-        WHERE id = ?
+        SET status = %s,
+            updated_at = %s
+        WHERE id = %s
         """,
         (
             new_status,
@@ -1124,6 +992,9 @@ def update_status(complaint_id):
 
 if __name__ == "__main__":
 
+    # Automatically create/check PostgreSQL tables
+    create_database()
+
     start_scheduler()
 
     app.run(
@@ -1132,3 +1003,4 @@ if __name__ == "__main__":
         debug=True,
         use_reloader=False
     )
+
