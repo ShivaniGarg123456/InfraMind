@@ -665,7 +665,7 @@ def create_complaint():
 
     new_id = cursor.lastrowid
 
-       conn.commit()
+    conn.commit()
     conn.close()
 
     complaint_info = {
