@@ -697,8 +697,6 @@ def create_complaint():
         "status": status,
         "deadline": deadline
     }), 201
-
-
 # =========================================================
 # STUDENT ANALYTICS
 # =========================================================
@@ -1165,7 +1163,6 @@ def update_status(complaint_id):
         "complaint_id": complaint_id,
         "status": new_status
     })
-
 
 # =========================================================
 # START APPLICATION
