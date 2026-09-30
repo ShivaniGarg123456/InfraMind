@@ -14,116 +14,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-
-        .add-department-tag {
-            display: inline-block;
-            margin: 25px 0;
-            padding: 12px 22px;
-            background: #2563eb;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .add-department-tag:hover {
-            background: #1d4ed8;
-        }
-
-        .department-form {
-            display: none;
-            background: white;
-            padding: 30px;
-            margin-bottom: 30px;
-            border-radius: 14px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-            max-width: 500px;
-        }
-
-        .department-form h2 {
-            margin-top: 0;
-            margin-bottom: 22px;
-        }
-
-        .department-form input {
-            display: block;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 12px 14px;
-            margin-bottom: 15px;
-            border: 1px solid #d1d5db;
-            border-radius: 7px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        .department-form input:focus {
-            border-color: #2563eb;
-        }
-
-        .department-form-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-        }
-
-        .department-form-buttons button {
-            padding: 11px 18px;
-            border: none;
-            border-radius: 7px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .create-department {
-            background: #2563eb;
-            color: white;
-        }
-
-        .create-department:hover {
-            background: #1d4ed8;
-        }
-
-        .cancel-department {
-            background: #e5e7eb;
-            color: #333;
-        }
-
-        .cancel-department:hover {
-            background: #d1d5db;
-        }
-
-        #departmentMessage {
-            margin-top: 15px;
-            font-size: 14px;
-        }
-
-        .admin-logout {
-            margin-top: 45px;
-            padding-bottom: 30px;
-            text-align: center;
-        }
-
-        .admin-logout a {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #dc2626;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .admin-logout a:hover {
-            background: #b91c1c;
-        }
-
-    </style>
-
 </head>
 
 
@@ -171,76 +61,6 @@
             <h2 id="escalated">0</h2>
             <p>Escalated</p>
         </div>
-
-    </div>
-
-
-    <!-- =========================
-         ADD DEPARTMENT
-    ========================== -->
-
-    <div
-        onclick="toggleDepartmentForm()"
-        class="add-department-tag"
-    >
-        + Add New Department
-    </div>
-
-
-    <!-- =========================
-         ADD DEPARTMENT FORM
-    ========================== -->
-
-    <div
-        id="departmentForm"
-        class="department-form"
-    >
-
-        <h2>Add New Department</h2>
-
-        <input
-            type="text"
-            id="departmentName"
-            placeholder="Department Name"
-        >
-
-        <input
-            type="email"
-            id="departmentEmail"
-            placeholder="Department Email"
-        >
-
-        <input
-            type="text"
-            id="departmentUsername"
-            placeholder="Department Username"
-        >
-
-        <input
-            type="password"
-            id="departmentPassword"
-            placeholder="Department Password"
-        >
-
-        <div class="department-form-buttons">
-
-            <button
-                onclick="addDepartment()"
-                class="create-department"
-            >
-                Create Department
-            </button>
-
-            <button
-                onclick="toggleDepartmentForm()"
-                class="cancel-department"
-            >
-                Cancel
-            </button>
-
-        </div>
-
-        <p id="departmentMessage"></p>
 
     </div>
 
@@ -394,124 +214,6 @@
 
 
     // =========================
-    // SHOW / HIDE DEPARTMENT FORM
-    // =========================
-
-    function toggleDepartmentForm() {
-
-        const form =
-            document.getElementById("departmentForm");
-
-        if (
-            form.style.display === "none" ||
-            form.style.display === ""
-        ) {
-
-            form.style.display = "block";
-
-        } else {
-
-            form.style.display = "none";
-
-        }
-
-    }
-
-
-    // =========================
-    // ADD DEPARTMENT
-    // =========================
-
-    function addDepartment() {
-
-        const departmentName =
-            document
-                .getElementById("departmentName")
-                .value
-                .trim();
-
-        const email =
-            document
-                .getElementById("departmentEmail")
-                .value
-                .trim();
-
-        const username =
-            document
-                .getElementById("departmentUsername")
-                .value
-                .trim();
-
-        const password =
-            document
-                .getElementById("departmentPassword")
-                .value;
-
-        const message =
-            document.getElementById(
-                "departmentMessage"
-            );
-
-
-        if (
-            departmentName === "" ||
-            email === "" ||
-            username === "" ||
-            password === ""
-        ) {
-
-            message.textContent =
-                "Please fill all fields.";
-
-            return;
-
-        }
-
-
-        if (password.length < 6) {
-
-            message.textContent =
-                "Password must be at least 6 characters.";
-
-            return;
-
-        }
-
-
-        console.log(
-            "New Department:",
-            {
-                department: departmentName,
-                email: email,
-                username: username
-            }
-        );
-
-
-        message.textContent =
-            "Department details are ready for backend connection.";
-
-
-        document.getElementById(
-            "departmentName"
-        ).value = "";
-
-        document.getElementById(
-            "departmentEmail"
-        ).value = "";
-
-        document.getElementById(
-            "departmentUsername"
-        ).value = "";
-
-        document.getElementById(
-            "departmentPassword"
-        ).value = "";
-
-    }
-
-
-    // =========================
     // LOAD ADMIN DASHBOARD
     // =========================
 
@@ -656,7 +358,9 @@
                     );
 
 
-                // Priority class
+                // =========================
+                // PRIORITY CLASS
+                // =========================
 
                 let priorityClass =
                     "priority-low";
@@ -693,7 +397,9 @@
                 }
 
 
-                // Status class
+                // =========================
+                // STATUS CLASS
+                // =========================
 
                 let statusClass =
                     "status-pending";
@@ -740,7 +446,9 @@
                 }
 
 
-                // Deadline
+                // =========================
+                // DEADLINE
+                // =========================
 
                 let deadline = "N/A";
 
@@ -1113,4 +821,3 @@
 </body>
 
 </html>
-
