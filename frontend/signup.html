@@ -1,4 +1,3 @@
-`
 <!DOCTYPE html>
 <html lang="en">
 
@@ -23,35 +22,52 @@
 
         <h2>Student Sign Up</h2>
 
+
+        <!-- NAME -->
         <input
             type="text"
             id="name"
             placeholder="Full Name"
         >
 
+
+        <!-- EMAIL -->
         <input
             type="email"
             id="email"
-            placeholder="Email Address"
+            placeholder="College Email Address"
         >
 
+
+        <!-- PASSWORD -->
         <input
             type="password"
             id="password"
             placeholder="Password"
         >
 
+
+        <!-- CONFIRM PASSWORD -->
         <input
             type="password"
             id="confirmPassword"
             placeholder="Confirm Password"
         >
 
-        <button onclick="signup()">
+
+        <!-- SIGN UP BUTTON -->
+        <button
+            type="button"
+            onclick="signup()"
+            id="signupButton"
+        >
             Send OTP
         </button>
 
+
+        <!-- MESSAGE -->
         <p id="signupMessage"></p>
+
 
         <p>
             Already have an account?
@@ -69,7 +85,7 @@
                 document.getElementById("name").value.trim();
 
             const email =
-                document.getElementById("email").value.trim();
+                document.getElementById("email").value.trim().toLowerCase();
 
             const password =
                 document.getElementById("password").value;
@@ -77,6 +93,13 @@
             const confirmPassword =
                 document.getElementById("confirmPassword").value;
 
+            const signupButton =
+                document.getElementById("signupButton");
+
+
+            // =========================
+            // BASIC VALIDATION
+            // =========================
 
             if (
                 name === "" ||
@@ -93,15 +116,46 @@
             }
 
 
-            if (password !== confirmPassword) {
+            // =========================
+            // NAME VALIDATION
+            // Only letters and spaces
+            // =========================
+
+            const namePattern =
+                /^[A-Za-z]+(?:\s+[A-Za-z]+)*$/;
+
+
+            if (!namePattern.test(name)) {
 
                 showMessage(
-                    "Passwords do not match."
+                    "Invalid name. Name should contain only letters and spaces."
                 );
 
                 return;
             }
 
+
+            // =========================
+            // MVN EMAIL VALIDATION
+            // =========================
+
+            const emailPattern =
+                /^[A-Za-z0-9._%+-]+@mvn\.edu\.in$/;
+
+
+            if (!emailPattern.test(email)) {
+
+                showMessage(
+                    "Invalid email. Please use your valid MVN college email."
+                );
+
+                return;
+            }
+
+
+            // =========================
+            // PASSWORD VALIDATION
+            // =========================
 
             if (password.length < 6) {
 
@@ -113,7 +167,28 @@
             }
 
 
+            // =========================
+            // CONFIRM PASSWORD
+            // =========================
+
+            if (password !== confirmPassword) {
+
+                showMessage(
+                    "Passwords do not match."
+                );
+
+                return;
+            }
+
+
+            // =========================
+            // SEND OTP
+            // =========================
+
             showMessage("Sending OTP...");
+
+            signupButton.disabled = true;
+            signupButton.textContent = "Sending...";
 
 
             try {
@@ -128,28 +203,44 @@
                         },
 
                         body: JSON.stringify({
-    name: name,
-    email: email,
-    password: password
-})
+
+                            name: name,
+
+                            email: email,
+
+                            password: password
+
+                        })
                     }
                 );
 
 
+                // Convert response to JSON
                 const data = await response.json();
 
+
+                // =========================
+                // BACKEND ERROR
+                // =========================
 
                 if (!response.ok) {
 
                     showMessage(
-                        data.error || "Failed to send OTP."
+                        data.error ||
+                        "Failed to send OTP."
                     );
+
+                    signupButton.disabled = false;
+                    signupButton.textContent = "Send OTP";
 
                     return;
                 }
 
 
-                // Store signup details temporarily
+                // =========================
+                // OTP SUCCESS
+                // =========================
+
                 localStorage.setItem(
                     "signupName",
                     name
@@ -171,12 +262,17 @@
                 );
 
 
+                // =========================
+                // GO TO OTP PAGE
+                // =========================
+
                 setTimeout(function () {
 
                     window.location.href =
                         "verify-otp.html";
 
                 }, 1000);
+
 
             }
 
@@ -188,14 +284,23 @@
                     error
                 );
 
+
                 showMessage(
                     "Could not connect to the server."
                 );
+
+
+                signupButton.disabled = false;
+                signupButton.textContent = "Send OTP";
 
             }
 
         }
 
+
+        // =========================
+        // MESSAGE FUNCTION
+        // =========================
 
         function showMessage(message) {
 
@@ -210,4 +315,3 @@
 </body>
 
 </html>
-

@@ -6,6 +6,7 @@ import sys
 import os
 import random
 import hashlib
+import re
 
 # =========================================================
 # PROJECT PATH
@@ -247,6 +248,18 @@ def send_otp():
 
     email = email.strip().lower()
     name = name.strip()
+
+    # Validate name: only letters and spaces are allowed.
+    if not re.fullmatch(r"[A-Za-z]+(?:\s+[A-Za-z]+)*", name):
+        return jsonify({
+            "error": "Invalid name. Name should contain only letters and spaces."
+        }), 400
+
+    # Validate MVN college email.
+    if not re.fullmatch(r"[A-Za-z0-9._%+-]+@mvn\.edu\.in", email):
+        return jsonify({
+            "error": "Invalid email. Please use your valid MVN college email."
+        }), 400
 
     if len(password) < 6:
 
